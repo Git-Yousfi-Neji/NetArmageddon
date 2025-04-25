@@ -99,22 +99,21 @@ class BaseAttack(abc.ABC):
         if self.running:
             self.running = False
             if self.thread and self.thread.is_alive():
-                self.thread.join(timeout=5)
-                if self.thread.is_alive():
-                    self.logger.error("Failed to stop attack thread")
+                try:
+                    self.thread.join(timeout=5)
+                except Exception as e:
+                    self.logger.error(f"Thread join error: {str(e)}")
+                finally:
+                    if self.thread.is_alive():
+                        self.logger.error("Failed to stop attack thread")
             self.logger.info("Attack stopped successfully")
 
     def validate_mac(self, mac: str) -> bool:
-        """Validate MAC address format.
-        
-        Args:
-            mac: MAC address to validate
-            
-        Returns:
-            bool: True if valid, False otherwise
-        """
-        parts = mac.split(':')
-        return (
-            len(parts) == 6 and
-            all(0 <= int(p, 16) <= 255 for p in parts)
-        )
+        """Validate MAC address format."""
+        try:
+            parts = mac.split(':')
+            if len(parts) != 6:
+                return False
+            return all(0 <= int(p, 16) <= 255 for p in parts)
+        except ValueError:
+            return False
