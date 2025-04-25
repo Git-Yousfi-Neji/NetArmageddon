@@ -104,6 +104,7 @@ class BaseAttack(abc.ABC):
                 except Exception as e:
                     self.logger.error(f"Thread join error: {str(e)}")
                 finally:
+                    # Check if thread is still alive after join attempt
                     if self.thread.is_alive():
                         self.logger.error("Failed to stop attack thread")
             self.logger.info("Attack stopped successfully")
