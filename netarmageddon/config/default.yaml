@@ -1,0 +1,7 @@
+attacks:
+  dhcp:
+    max_pps: 100
+    default_devices: 50
+  arp:
+    base_ip: "192.168.1."
+    refresh_interval: 5
