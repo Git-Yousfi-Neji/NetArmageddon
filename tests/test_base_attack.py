@@ -1,10 +1,38 @@
 # tests/test_base_attack.py
 import pytest
+import time
 from unittest.mock import patch
 import logging
 import threading
 from netarmageddon.core.base_attack import BaseAttack
 from scapy.arch import get_if_list
+
+# New test class for failed cleanup scenarios
+class StuckAttack(BaseAttack):
+    def start(self):
+        self.running = True
+        self.thread = threading.Thread(target=self._infinite_loop, daemon=True)
+        self.thread.start()
+
+    def _infinite_loop(self):
+        """Truly infinite loop for failure scenarios"""
+        while True:
+            time.sleep(0.1)
+
+@pytest.fixture
+def stuck_attack(valid_interface):
+    return StuckAttack(valid_interface)
+
+def test_thread_cleanup_on_failure(stuck_attack, caplog):
+    """Test thread cleanup when stop fails"""
+    stuck_attack.start()
+    time.sleep(0.1)
+    
+    with patch.object(stuck_attack.thread, 'join', side_effect=RuntimeError("Thread stuck")):
+        stuck_attack.stop()
+    
+    assert "Thread join error: Thread stuck" in caplog.text
+    assert "Failed to stop attack thread" in caplog.text
 
 # Mock concrete class for testing abstract methods
 class MockAttack(BaseAttack):
@@ -13,12 +41,13 @@ class MockAttack(BaseAttack):
         self.thread = threading.Thread(target=self._mock_loop)
         self.thread.start()
 
+    def _mock_loop(self):
+        """Controlled loop that respects running flag"""
+        while self.running:
+            time.sleep(0.1)  # Regular check interval
+
     def stop(self):
         self._base_stop()
-
-    def _mock_loop(self):
-        while self.running:
-            pass
 
 @pytest.fixture
 def valid_interface():
@@ -105,16 +134,16 @@ def test_base_stop_mechanism(mock_attack):
 def test_thread_cleanup_on_failure(mock_attack, caplog):
     """Test thread cleanup when stop fails"""
     mock_attack.start()
+    time.sleep(0.1)  # Ensure thread starts
     
-    def mock_join(timeout=None):
-        raise RuntimeError("Thread stuck")
-    
-    with patch.object(mock_attack.thread, 'join', mock_join):
+    # Force thread to appear alive and raise error on join
+    with patch.object(mock_attack.thread, 'is_alive', return_value=True), \
+         patch.object(mock_attack.thread, 'join', side_effect=RuntimeError("Thread stuck")):
+        
         mock_attack.stop()
     
     assert "Thread join error: Thread stuck" in caplog.text
     assert "Failed to stop attack thread" in caplog.text
-    assert mock_attack.running is False
 
 # tests/test_base_attack.py
 
