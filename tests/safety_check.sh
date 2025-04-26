@@ -46,17 +46,17 @@ footer() {
 
 # Test functions
 test_rate_limit() {
-    python3 -m netarmageddon dhcp -i lo -n 101 2>&1 | \
+    python -m netarmageddon dhcp -i lo -n 101 2>&1 | \
     grep -q "exceeds safety limit"
 }
 
 test_invalid_interface() {
-    python3 -m netarmageddon dhcp -i invalid_interface -n 10 2>&1 | \
+    python -m netarmageddon dhcp -i invalid_interface -n 10 2>&1 | \
     grep -q "not found"
 }
 
 test_invalid_ip_format() {
-    python3 -m netarmageddon arp -i lo -b 192.168.1 -n 10 2>&1 | \
+    python -m netarmageddon arp -i lo -b 192.168.1 -n 10 2>&1 | \
     grep -q "Invalid base IP"
 }
 
