@@ -1,6 +1,7 @@
 import argparse
 import logging
 from .core import DHCPExhaustion, ARPKeepAlive
+import time
 
 def configure_logging():
     """Set up logging configuration"""

