@@ -13,6 +13,15 @@ sudo python -m netarmageddon arp -i eth0 -b 192.168.1.
 sudo python -m netarmageddon dhcp -i eth0 -n 100 &
 sudo python -m netarmageddon arp -i eth0 -b 192.168.1. &
 ```
+### DHCP Options
+Specify which DHCP parameters to request using option codes:
+```bash
+# Request subnet mask (1), router (3), and DNS servers (6)
+sudo python -m netarmageddon dhcp -i eth0 -O 1,3,6
+
+# Request options 1-10 and 15
+sudo python -m netarmageddon dhcp -i eth0 -O 1-10,15
+```
 
 ## Command Reference
 

