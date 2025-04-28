@@ -22,11 +22,13 @@ class DHCPExhaustion(BaseAttack):
     def _generate_mac(self) -> str:
         """Generate RFC-compliant MAC address"""
         while True:
-            mac = "02:00:00:%02x:%02x:%02x" % (
-                random.randint(0, 255),
-                random.randint(0, 255),
-                random.randint(0, 255)
-            )
+            mac = [ 0xDE, 0xAD, 
+                    random.randint(0x00, 0x29),
+                    random.randint(0x00, 0x7f),
+                    random.randint(0x00, 0xff),
+                    random.randint(0x00, 0xff) 
+                  ]
+            mac = ':'.join(map(lambda x: "%02x" % x, mac))
             if mac not in self.sent_macs:
                 self.sent_macs.add(mac)
                 return mac
