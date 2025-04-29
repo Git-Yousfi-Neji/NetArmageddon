@@ -30,6 +30,8 @@ sudo python -m netarmageddon dhcp -i eth0 -O 1-10,15
 |--------|-------------|
 | `-i/--interface` | Network interface (required) |
 | `-n/--num-devices` | Number of devices to simulate (default: 50) |
+| `-s/--client-src` | Custom MAC list |
+| `-O/--request-options` | DHCP option codes |
 
 ### ARP Keep-Alive
 | Option | Description |
@@ -41,4 +43,6 @@ sudo python -m netarmageddon dhcp -i eth0 -O 1-10,15
 ## Safety Features
 - Automatic rate limiting (max 100 packets/sec)
 - Interface validation
+- Input validation for MAC/IP formats
+- Clean thread termination
 - Ctrl+C graceful shutdown

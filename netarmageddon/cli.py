@@ -102,9 +102,9 @@ def main():
                          help='Comma-separated list of MAC addresses to cycle through')
 
     # ARP attack subcommand
-    arp_parser = subparsers.add_parser("arp", help="ARP keep-alive attack")
+    arp_parser = subparsers.add_parser("arp", help="Maintain devices in ARP tables")
     arp_parser.add_argument("-i", "--interface", required=True,
-                          help="Network interface to use")
+                          help="Network interface to use (e.g., eth0)")
     arp_parser.add_argument("-b", "--base-ip", required=True,
                           help="Base IP address (e.g., 192.168.1.)")
     arp_parser.add_argument("-n", "--num-devices", type=int, default=50,

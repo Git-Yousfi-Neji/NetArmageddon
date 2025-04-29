@@ -34,9 +34,12 @@ class DHCPExhaustion(BaseAttack):
         validated = []
         pattern = r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$"
 
-        for mac in mac_list:
+        for idx, mac in enumerate(mac_list):
             if not re.match(pattern, mac):
-                raise ValueError(f"Invalid MAC address format: {mac}")
+                raise ValueError(
+                    f"Invalid MAC #{idx+1}: '{mac}'\n"
+                    "Valid format: '01:23:45:67:89:ab' or '01-23-45-67-89-ab'"
+                )
             # Normalize to lowercase with colons
             normalized = mac.lower().replace('-', ':')
             validated.append(normalized)

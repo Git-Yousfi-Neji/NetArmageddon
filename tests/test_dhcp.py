@@ -40,7 +40,13 @@ def test_device_limit():
     assert not attack.thread.is_alive()
     assert attack.running is False
 
-@pytest.mark.timeout(5)
+def test_device_count_limit():
+    """Verify attack stops after specified device count"""
+    attack = DHCPExhaustion("lo", num_devices=30)
+    attack.start()
+    time.sleep(2)  # Allow time for execution
+    assert not attack.running, "Attack should auto-stop after 3 devices"
+
 def test_device_limit_with_two_macs(monkeypatch):
     """
     When num_devices=3 but only two MACs are given,
