@@ -2,25 +2,43 @@
 
 ## Basic Commands
 
-```bash
 # DHCP Exhaustion (50 devices)
+```
 sudo python -m netarmageddon dhcp -i eth0 -n 50
+```
 
 # ARP Keep-Alive (192.168.1.x network)
+```
 sudo python -m netarmageddon arp -i eth0 -b 192.168.1.
+```
 
 # Combined attack (Background processes)
+```
 sudo python -m netarmageddon dhcp -i eth0 -n 100 &
 sudo python -m netarmageddon arp -i eth0 -b 192.168.1. &
 ```
 ### DHCP Options
+```
 Specify which DHCP parameters to request using option codes:
-```bash
+```
 # Request subnet mask (1), router (3), and DNS servers (6)
+```
 sudo python -m netarmageddon dhcp -i eth0 -O 1,3,6
+```
 
 # Request options 1-10 and 15
+```
 sudo python -m netarmageddon dhcp -i eth0 -O 1-10,15
+```
+## ARP Keep-Alive Options
+# Custom MAC prefix and 10-second interval
+```
+sudo python -m netarmageddon arp -i eth0 -b 192.168.1. -n 100 -m "de:ad:00" -t 10
+```
+
+# Default settings (50 devices, 5s interval)
+```
+sudo python -m netarmageddon arp -i eth0 -b 10.0.0.
 ```
 
 ## Command Reference
@@ -39,6 +57,7 @@ sudo python -m netarmageddon dhcp -i eth0 -O 1-10,15
 | `-i/--interface` | Network interface (required) |
 | `-b/--base-ip` | Base IP address (e.g., 192.168.1.) |
 | `-n/--num-devices` | Devices to maintain (default: 50) |
+| `-t/--interval` | Announcement interval (default: 5) |
 
 ## Safety Features
 - Automatic rate limiting (max 100 packets/sec)

