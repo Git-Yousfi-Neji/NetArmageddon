@@ -11,6 +11,35 @@ def configure_logging():
         level=logging.INFO
     )
 
+def parse_mac_address(arg_list: List[str]) -> argparse.Namespace:
+    """
+    Normalizes MAC addresses (converts '-' to ':').
+    """
+    parser = argparse.ArgumentParser(
+        prog="netarmageddon dhcp",
+        description="DHCP exhaustion attack arguments"
+    )
+
+    parser.add_argument(
+        "-s", "--client-src",
+        type=lambda x: x.split(","),
+        default=[],
+        help='Comma-separated list of MAC addresses to cycle through'
+    )
+
+    args = parser.parse_args(arg_list)
+
+    # Normalize any hyphens in MAC addresses to colons
+    if args.client_src:
+        normalized = []
+        for mac in args.client_src:
+            # convert AA-BB-CC-DD-EE-FF → aa:bb:cc:dd:ee:ff
+            m = mac.strip().lower().replace("-", ":")
+            normalized.append(m)
+        args.client_src = normalized
+
+    return args
+
 def parse_option_range(option_str: str) -> List[int]:
     """Convert '1,3-5,7' -> [1,3,4,5,7]; raises ValueError on malformed or descending ranges."""
     if not option_str:
@@ -68,6 +97,10 @@ def main():
                            default=list(range(81)),  # Default 0-80
                            help='Comma-separated DHCP options to request (e.g. "1,3,6" or "1-10,15")')
 
+    dhcp_parser.add_argument('-s', '--client-src',
+                         type=lambda x: x.split(','),
+                         help='Comma-separated list of MAC addresses to cycle through')
+
     # ARP attack subcommand
     arp_parser = subparsers.add_parser("arp", help="ARP keep-alive attack")
     arp_parser.add_argument("-i", "--interface", required=True,
@@ -81,7 +114,12 @@ def main():
 
     try:
         if args.command == "dhcp":
-            attack = DHCPExhaustion(args.interface, args.num_devices)
+            attack = DHCPExhaustion(
+            interface=args.interface,
+            num_devices=args.num_devices,
+            request_options=args.request_options,
+            client_src=args.client_src
+            )
         elif args.command == "arp":
             attack = ARPKeepAlive(args.interface, args.base_ip, args.num_devices)
 
