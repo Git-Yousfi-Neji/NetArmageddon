@@ -11,7 +11,7 @@ class ARPKeepAlive(BaseAttack):
     def __init__(self, interface: str, 
                  base_ip: str, 
                  num_devices: int = 50, 
-                 mac_prefix: str = "02:00:00", 
+                 mac_prefix: str = "de:ad:00", 
                  interval: float = 5.0, 
                  cycles: int = 1):
         """

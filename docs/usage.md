@@ -1,5 +1,24 @@
 # NetArmageddon Usage Guide
 
+## Command Reference
+### DHCP Exhaustion
+| Option | Description |
+|--------|-------------|
+| `-i/--interface` | Network interface (required) |
+| `-n/--num-devices` | Number of devices to simulate (default: 50) |
+| `-s/--client-src` | Custom MAC list |
+| `-O/--request-options` | DHCP option codes |
+| `-s/--client-src` | Comma-separated list of MAC addresses to cycle through |
+
+### ARP Keep-Alive
+| Option | Description |
+|--------|-------------|
+| `-i/--interface` | Network interface (required) |
+| `-b/--base-ip` | Base IP address (e.g., 192.168.1.) |
+| `-n/--num-devices` | Devices to maintain (default: 50) |
+| `-t/--interval` | Announcement interval (default: 5) |
+| `-c/ --cycles` | Number of ARP announcement cycles to perform (default: 1) |
+
 ## Basic Commands
 
 # DHCP Exhaustion (50 devices)
@@ -41,27 +60,18 @@ sudo python -m netarmageddon arp -i eth0 -b 192.168.1. -n 100 -m "de:ad:00" -t 1
 sudo python -m netarmageddon arp -i eth0 -b 10.0.0.
 ```
 
-## Command Reference
+# Custom MAC prefix and 10 s interval
+```
+sudo python -m netarmageddon arp -i eth0 -b 192.168.1. -n 100  -m de:ad:00 -t 10 -c 1
+```
 
-### DHCP Exhaustion
-| Option | Description |
-|--------|-------------|
-| `-i/--interface` | Network interface (required) |
-| `-n/--num-devices` | Number of devices to simulate (default: 50) |
-| `-s/--client-src` | Custom MAC list |
-| `-O/--request-options` | DHCP option codes |
-
-### ARP Keep-Alive
-| Option | Description |
-|--------|-------------|
-| `-i/--interface` | Network interface (required) |
-| `-b/--base-ip` | Base IP address (e.g., 192.168.1.) |
-| `-n/--num-devices` | Devices to maintain (default: 50) |
-| `-t/--interval` | Announcement interval (default: 5) |
+# Multiple cycles
+```
+sudo python -m netarmageddon arp -i eth0 -b 10.0.0. -n 3 -m 02:00:00 -t 2.5 -c 2
+```
 
 ## Safety Features
 - Automatic rate limiting (max 100 packets/sec)
 - Interface validation
 - Input validation for MAC/IP formats
-- Clean thread termination
-- Ctrl+C graceful shutdown
+- Clean thread termination and graceful shutdown on CTRL+C

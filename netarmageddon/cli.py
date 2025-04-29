@@ -1,8 +1,14 @@
 import argparse
 import logging
+import os
+import sys
 from typing import List
 from .core import DHCPExhaustion, ARPKeepAlive
 import time
+
+if os.geteuid() != 0:
+    print("This script requires root privileges!")
+    sys.exit(1)
 
 def configure_logging():
     """Set up logging configuration"""
