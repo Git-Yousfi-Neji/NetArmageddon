@@ -6,9 +6,10 @@ from typing import List
 from .core import DHCPExhaustion, ARPKeepAlive
 import time
 
-if os.geteuid() != 0:
-    print("This script requires root privileges!")
-    sys.exit(1)
+def check_root_privileges():
+    if os.geteuid() != 0:
+        print("This script requires root privileges!")
+        sys.exit(1)
 
 def configure_logging():
     """Set up logging configuration"""
@@ -81,6 +82,7 @@ def parse_option_range(option_str: str) -> List[int]:
 
 def main():
     """Command-line interface entry point"""
+    check_root_privileges()
     configure_logging()
     
     parser = argparse.ArgumentParser(
