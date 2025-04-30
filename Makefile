@@ -1,8 +1,7 @@
-.PHONY: install format lint test docs
+.PHONY: install format lint test docs ci-tests
 
 install:
-	@pip install -r requirements.txt
-	@pip install -r dev-requirements.txt
+	@pip install -r requirements.txt -r dev-requirements.txt -e .
 	@pre-commit install
 
 format:
