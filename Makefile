@@ -1,6 +1,7 @@
 .PHONY: install format lint test docs
 
 install:
+	@pip install -r requirements.txt
 	@pip install -r dev-requirements.txt
 	@pre-commit install
 

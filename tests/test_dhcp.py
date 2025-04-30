@@ -2,8 +2,8 @@ import time
 from typing import Optional
 
 import pytest
-from scapy.layers.dhcp import BOOTP, DHCP, IP
-from scapy.layers.inet import UDP
+from scapy.layers.dhcp import BOOTP, DHCP
+from scapy.layers.inet import IP, UDP
 from scapy.layers.l2 import Ether
 from scapy.packet import Packet
 

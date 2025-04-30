@@ -3,10 +3,11 @@
 import logging
 import threading
 import time
-from typing import Generator, cast
+from typing import Generator
 from unittest.mock import patch
 
 import pytest
+from pytest import fixture
 from scapy.arch import get_if_list
 
 from netarmageddon.core.base_attack import BaseAttack
@@ -49,16 +50,19 @@ class MockAttack(BaseAttack):
 # --- Fixtures ---
 
 
+@fixture
 def valid_interface() -> str:
     """Return a valid interface name for tests."""
-    return cast(str, get_if_list()[0])
+    return str(get_if_list()[0])
 
 
+@fixture
 def stuck_attack(valid_interface: str) -> Generator[StuckAttack, None, None]:
     """Provide a StuckAttack instance."""
     yield StuckAttack(valid_interface)
 
 
+@fixture
 def mock_attack(valid_interface: str) -> Generator[MockAttack, None, None]:
     """Provide a MockAttack instance."""
     yield MockAttack(valid_interface)

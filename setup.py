@@ -7,5 +7,6 @@ setup(
     install_requires=[
         "scapy>=2.5.0",
         "PyYAML>=6.0.0",
+        "rich>=12.0.0",
     ],
 )

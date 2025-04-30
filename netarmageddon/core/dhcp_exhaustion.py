@@ -5,8 +5,11 @@ import time
 from collections import deque
 from typing import List, Optional
 
-from scapy.all import BOOTP, DHCP, IP, UDP, Ether, sendp
+from scapy.layers.dhcp import BOOTP, DHCP
+from scapy.layers.inet import IP, UDP
+from scapy.layers.l2 import Ether
 from scapy.packet import Packet
+from scapy.sendrecv import sendp
 
 from .base_attack import BaseAttack
 

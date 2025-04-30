@@ -1,6 +1,7 @@
 # Testing
 pytest>=8.0
 pytest-cov
+pytest-mypy-plugins==1.3.0
 
 # Linting & Static Analysis
 flake8

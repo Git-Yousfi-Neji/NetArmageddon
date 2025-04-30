@@ -3,7 +3,8 @@ import re
 import threading
 import time
 
-from scapy.all import ARP, Ether, sendp
+from scapy.all import sendp
+from scapy.layers.l2 import ARP, Ether
 from scapy.packet import Packet
 
 from .base_attack import BaseAttack
