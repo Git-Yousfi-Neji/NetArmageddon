@@ -154,8 +154,11 @@ def test_thread_cleanup_on_failure(
     time.sleep(0.1)  # Give thread time to start
 
     # Force is_alive() True and join() to raise
-    with patch.object(mock_attack.thread, "is_alive", return_value=True), patch.object(
-        mock_attack.thread, "join", side_effect=RuntimeError("Thread stuck")
+    with (
+        patch.object(mock_attack.thread, "is_alive", return_value=True),
+        patch.object(
+            mock_attack.thread, "join", side_effect=RuntimeError("Thread stuck")
+        ),
     ):
         mock_attack.stop()
 

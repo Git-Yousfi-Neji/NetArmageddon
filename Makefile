@@ -19,3 +19,6 @@ test:
 docs:
 	@mkdocs build
 	@mkdocs serve  # For live preview
+
+ci-test:
+	@pytest --cov=netarmageddon --cov-report=xml
