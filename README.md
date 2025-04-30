@@ -5,7 +5,7 @@ A network stress testing framework for simulating device connections and evaluat
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Git-Yousfi-Neji/NetArmageddon/tests.yml?branch=master)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Git-Yousfi-Neji/NetArmageddon)
 ![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)
-![License](https://img.shields.io/badge/license-GPL--2.0-important)
+![License](https://img.shields.io/badge/license-GPL--3.0-important)
 
 ## Features ✨
 
@@ -97,7 +97,7 @@ We welcome contributions from the community! Here's how you can help:
 
 # 1. Fork and clone the repository
 ```
-git clone https://github.com/<your-username>/NetArmageddon.git
+git clone https://github.com/Git-Yousfi-Neji/NetArmageddon.git
 ```
 # 2. Create feature branch
 ```
