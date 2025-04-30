@@ -49,19 +49,16 @@ class MockAttack(BaseAttack):
 # --- Fixtures ---
 
 
-@pytest.fixture  # type: ignore[misc]
 def valid_interface() -> str:
     """Return a valid interface name for tests."""
     return cast(str, get_if_list()[0])
 
 
-@pytest.fixture  # type: ignore[misc]
 def stuck_attack(valid_interface: str) -> Generator[StuckAttack, None, None]:
     """Provide a StuckAttack instance."""
     yield StuckAttack(valid_interface)
 
 
-@pytest.fixture  # type: ignore[misc]
 def mock_attack(valid_interface: str) -> Generator[MockAttack, None, None]:
     """Provide a MockAttack instance."""
     yield MockAttack(valid_interface)
