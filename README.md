@@ -43,28 +43,28 @@ pip install -r requirements.txt
 
 ## Usage 🚀
 
-# DHCP Exhaustion (50 devices)
+#### DHCP Exhaustion (50 devices)
 ```
 sudo python -m netarmageddon dhcp -i eth0 -n 50
 ```
 
-# ARP Keep-Alive (192.168.1.x network)
+#### ARP Keep-Alive (192.168.1.x network)
 ```
 sudo python -m netarmageddon arp -i eth0 -b 192.168.1.
 ```
 
-# Combined attack (Ctrl+C to stop)
+#### Combined attack (Ctrl+C to stop)
 ```
 sudo python -m netarmageddon dhcp -i eth0 -n 100 & \
 sudo python -m netarmageddon arp -i eth0 -b 192.168.1.
 ```
 
-# Limited device count with custom MACs
+#### Limited device count with custom MACs
 ```
 sudo python -m netarmageddon dhcp -i eth0 -n 10 -s de:ad:be:ef:13:37,ca:fe:ba:be:00:11
 ```
 
-# Specific DHCP options request
+#### Specific DHCP options request
 ```
 sudo python -m netarmageddon dhcp -i eth0 -O 1,3,6,15 -n 5
 ```
@@ -73,45 +73,43 @@ sudo python -m netarmageddon dhcp -i eth0 -O 1,3,6,15 -n 5
 
 Explore comprehensive project documentation to understand implementation details and usage:
 
-- **[Usage Guide](docs/usage.md)** - Core functionality walkthrough with examples  
-- **[Development Setup](docs/development.md)** - Environment configuration and contribution guidelines  
-- **[Testing Strategy](docs/testing.md)** - Validation approach and quality assurance processes  
-- **[API Reference](docs/api.md)** (WIP) - Module/class specifications and interfaces  
-- **[Architecture Overview](docs/architecture.md)** (Planned) - System design and component relationships  
+- **[Usage Guide](docs/usage.md)** - Core functionality walkthrough with examples
+- **[Development Setup](docs/development.md)** - Environment configuration and contribution guidelines
+- **[Testing Strategy](docs/testing.md)** - Validation approach and quality assurance processes
+- **[API Reference](docs/api.md)** (WIP) - Module/class specifications and interfaces
+- **[Architecture Overview](docs/architecture.md)** (Planned) - System design and component relationships
 
 > **Note**: Documentation is actively being developed. Check back regularly for updates or [contribute](CONTRIBUTING.md) improvements!
-
-For live documentation, visit our [GitHub Pages site](https://git-yousfi-neji.github.io/NetArmageddon/) (Coming Soon).
 
 ## Contributing 🤝
 
 We welcome contributions from the community! Here's how you can help:
 
 ### How to Contribute
-1. **Report Bugs**  
+1. **Report Bugs**
    Open an [issue](https://github.com/Git-Yousfi-Neji/NetArmageddon/issues) with detailed reproduction steps
-2. **Suggest Features**  
+2. **Suggest Features**
    Propose new modules/improvements via Discussions
 
 ### Development Workflow
 
-# 1. Fork and clone the repository
+#### 1. Fork and clone the repository
 ```
 git clone https://github.com/Git-Yousfi-Neji/NetArmageddon.git
 ```
-# 2. Create feature branch
+#### 2. Create feature branch
 ```
 git checkout -b feature/awesome-feature
 ```
-# 3. Install dev dependencies
+#### 3. Install dev dependencies
 ```
 pip install -r dev-requirements.txt
 ```
-# 4. Commit changes with semantic messages
+#### 4. Commit changes with semantic messages
 ```
 git commit -m "feat: add packet validation system"
 ```
-# 5. Push and open PR
+#### 5. Push and open PR
 ```
 git push origin feature/awesome-feature
 ```

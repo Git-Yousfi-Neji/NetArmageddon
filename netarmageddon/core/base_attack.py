@@ -2,61 +2,43 @@ import abc
 import logging
 import threading
 from functools import wraps
+from typing import Any, Callable, Optional, Type, TypeVar
+
 from scapy.arch import get_if_list
 
+F = TypeVar("F", bound=Callable[..., Any])
+
+
 class BaseAttack(abc.ABC):
-    """Abstract base class for network attack modules.
-    
-    Provides common functionality for:
-    - Thread management
-    - Rate limiting
-    - Interface validation
-    - Safety controls
-    - Context management
-    
-    Attributes:
-        interface (str): Network interface to use
-        running (bool): Attack status flag
-        thread (threading.Thread): Attack thread
-        logger (logging.Logger): Configured logger
-        MAX_PPS (int): Maximum allowed packets per second (safety limit)
-    """
-    
-    MAX_PPS = 100  # Class-wide safety limit
-    
-    def __init__(self, interface: str):
-        """Initialize base attack parameters.
-        
-        Args:
-            interface: Network interface name to use for attack
-            
-        Raises:
-            ValueError: If interface doesn't exist
-        """
-        self.interface = interface
-        self.running = False
-        self.thread = None
-        self.logger = logging.getLogger(self.__class__.__name__)
-        
+    """Abstract base class for network attack modules."""
+
+    MAX_PPS: int = 100  # Class-wide safety limit
+
+    def __init__(self, interface: str) -> None:
+        """Initialize base attack parameters."""
+        self.interface: str = interface
+        self.running: bool = False
+        self.thread: Optional[threading.Thread] = None
+        self.logger: logging.Logger = logging.getLogger(self.__class__.__name__)
         self._validate_interface()
 
-    def _validate_interface(self):
+    def _validate_interface(self) -> None:
         """Verify network interface exists."""
         if self.interface not in get_if_list():
-            raise ValueError(f"Interface '{self.interface}' not found. "
-                             f"Available interfaces: {get_if_list()}")
+            raise ValueError(
+                f"Interface '{self.interface}' not found. "
+                f"Available interfaces: {get_if_list()}"
+            )
 
     def _rate_limit(self, pps: int) -> int:
-        """Enforce packets-per-second safety limit.
-        
+        """
+        Enforce packets-per-second safety limit.
+
         Args:
             pps: Requested packets per second
-            
+
         Returns:
-            int: Allowed packets per second
-            
-        Logs:
-            Warning when exceeding safety limit
+            Allowed packets per second
         """
         if pps > self.MAX_PPS:
             self.logger.warning(
@@ -66,35 +48,46 @@ class BaseAttack(abc.ABC):
             return self.MAX_PPS
         return pps
 
-    def requires_active_attack(func):
-        """Decorator to ensure method is only called when attack is running."""
+    @staticmethod
+    def requires_active_attack(func: F) -> F:
+        """
+        Decorator to ensure method is only called when attack is running.
+        Raises RuntimeError otherwise.
+        """
+
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(self: "BaseAttack", *args: Any, **kwargs: Any) -> Any:
             if not self.running:
                 raise RuntimeError("Attack must be running to use this method")
             return func(self, *args, **kwargs)
-        return wrapper
+
+        return wrapper  # type: ignore
 
     @abc.abstractmethod
-    def start(self):
+    def start(self) -> None:
         """Start the attack in a background thread."""
-        pass
+        ...
 
     @abc.abstractmethod
-    def stop(self):
+    def stop(self) -> None:
         """Stop the attack and clean up resources."""
-        pass
+        ...
 
-    def __enter__(self):
+    def __enter__(self) -> "BaseAttack":
         """Context manager entry point."""
         self.start()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[Any],
+    ) -> None:
         """Context manager exit point."""
         self.stop()
 
-    def _base_stop(self):
+    def _base_stop(self) -> None:
         """Common stop procedure for all attacks."""
         if self.running:
             self.running = False
@@ -102,9 +95,8 @@ class BaseAttack(abc.ABC):
                 try:
                     self.thread.join(timeout=5)
                 except Exception as e:
-                    self.logger.error(f"Thread join error: {str(e)}")
+                    self.logger.error(f"Thread join error: {e}")
                 finally:
-                    # Check if thread is still alive after join attempt
                     if self.thread.is_alive():
                         self.logger.error("Failed to stop attack thread")
             self.logger.info("Attack stopped successfully")
@@ -112,9 +104,9 @@ class BaseAttack(abc.ABC):
     def validate_mac(self, mac: str) -> bool:
         """Validate MAC address format."""
         try:
-            parts = mac.split(':')
+            parts = mac.split(":")
             if len(parts) != 6:
                 return False
-            return all(0 <= int(p, 16) <= 255 for p in parts)
+            return all(0 <= int(p, 16) <= 0xFF for p in parts)
         except ValueError:
             return False

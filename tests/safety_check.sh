@@ -23,7 +23,7 @@ test_case() {
     local test_name="$1"
     shift
     echo -e "${CYAN}▶ Running test: ${test_name}${NC}"
-    
+
     if "$@"; then
         echo -e "${GREEN}✔ Success: ${test_name}${NC}\n"
         ((PASSED++))
@@ -40,7 +40,7 @@ footer() {
     echo -e "${GREEN}Passed: ${PASSED}${NC}"
     echo -e "${RED}Failed: ${FAILED}${NC}"
     echo -e "${YELLOW}------------------------------------------------${NC}"
-    
+
     exit $((FAILED > 0 ? 1 : 0))
 }
 

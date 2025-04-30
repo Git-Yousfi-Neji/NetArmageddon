@@ -1,0 +1,19 @@
+site_name: NetArmageddon
+nav:
+  - Home: index.md
+  - Usage: usage.md
+  - Development: development.md
+  - API Reference: api.md
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.indexes
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          selection:
+            docstring_style: google

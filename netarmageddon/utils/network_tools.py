@@ -1,8 +1,8 @@
-import re
 import socket
 import subprocess
-from ipaddress import IPv4Network, IPv4Address
+from ipaddress import IPv4Address, IPv4Network
 from typing import Optional
+
 
 def validate_ip(ip: str) -> bool:
     """Validate IPv4 address format."""
@@ -12,11 +12,13 @@ def validate_ip(ip: str) -> bool:
     except ValueError:
         return False
 
+
 def generate_random_ip(network: str = "192.168.1.0/24") -> str:
     """Generate random IP within a network range."""
     net = IPv4Network(network, strict=False)
     host = net.hosts()
     return str(next(host))
+
 
 def is_port_available(port: int, interface: str = "0.0.0.0") -> bool:
     """Check if TCP port is available."""
@@ -26,6 +28,7 @@ def is_port_available(port: int, interface: str = "0.0.0.0") -> bool:
             return True
         except OSError:
             return False
+
 
 def get_default_gateway() -> Optional[str]:
     """Get system's default gateway IP."""

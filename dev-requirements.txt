@@ -1,0 +1,31 @@
+# Testing
+pytest>=8.0
+pytest-cov
+
+# Linting & Static Analysis
+flake8
+mypy
+
+# Code Formatting
+black
+isort
+
+# Pre-commit Hooks
+pre-commit
+
+# Documentation
+mkdocstrings[python]
+mkdocs
+mkdocs-material
+mkdocstrings
+
+# Type Stubs (if needed)
+types-requests
+types-PyYAML
+
+# Security
+safety
+
+# Advanced Testing
+freezegun
+hypothesis

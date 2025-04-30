@@ -13,19 +13,19 @@ Welcome to NetArmageddon! We appreciate your interest in contributing. Please fo
 - [Acknowledgements](#acknowledgements)
 
 ## Ways to Contribute
-- 🐛 **Report Bugs**  
+- 🐛 **Report Bugs**
   Open an [issue](https://github.com/Git-Yousfi-Neji/NetArmageddon/issues) with:
   - Detailed description
   - Reproduction steps
   - Expected vs actual behavior
-- 💡 **Suggest Features**  
+- 💡 **Suggest Features**
   Use [Discussions](https://github.com/Git-Yousfi-Neji/NetArmageddon/discussions) to propose:
   - New attack modules
   - Performance improvements
   - UX enhancements
-- 🧑💻 **Code Contributions**  
+- 🧑💻 **Code Contributions**
   Follow the workflow below
-- 📚 **Improve Documentation**  
+- 📚 **Improve Documentation**
   Update guides or add examples
 
 ## Development Setup

