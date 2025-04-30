@@ -22,6 +22,8 @@ jobs:
           git diff --exit-code --name-only
 
       - name: Run linters
+        env:
+          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
         run: make lint
 
       - name: Run tests with coverage

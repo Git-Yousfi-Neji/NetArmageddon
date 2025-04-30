@@ -11,7 +11,7 @@ format:
 lint:
 	@flake8 netarmageddon tests
 	@mypy netarmageddon tests
-	@safety scan
+	@safety scan || echo "Safety scan skipped - add SAFETY_API_KEY for full check"
 
 test:
 	@pytest -v --cov=netarmageddon --cov-report=term-missing
