@@ -2,10 +2,14 @@
 
 A network stress testing framework for simulating device connections and evaluating router performance under load.
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Git-Yousfi-Neji/NetArmageddon/tests.yml?branch=master)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Git-Yousfi-Neji/NetArmageddon)
 ![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)
-![License](https://img.shields.io/badge/license-GPL--3.0-important)
+[![CI Tests](https://img.shields.io/github/actions/workflow/status/Git-Yousfi-Neji/NetArmageddon/tests.yml?branch=master)](https://github.com/Git-Yousfi-Neji/NetArmageddon/actions)
+[![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+[![Checked with mypy](https://img.shields.io/badge/mypy-checked-blue)](http://mypy-lang.org/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Documentation Status](https://img.shields.io/badge/docs-mkdocs%20material-blue)](https://git-yousfi-neji.github.io/NetArmageddon/)
 
 ## Features ✨
 
@@ -18,6 +22,9 @@ A network stress testing framework for simulating device connections and evaluat
 - **DHCP Options Control**: Specify exact DHCP options for detailed simulation
 - **Device Limits**: Configure the maximum number of simulated devices
 - **Thread-Safe Generation**: Safely generate packets across multiple threads
+- **Type-Safe Codebase**: Full mypy type checking coverage
+- **Automated Code Quality**: Pre-commit hooks for formatting/linting
+- **Modern Testing Suite**: 90%+ test coverage with pytest
 
 ## Warning ⚠️
 
@@ -36,9 +43,9 @@ git clone https://github.com/Git-Yousfi-Neji/NetArmageddon.git
 cd NetArmageddon
 ```
 
-#### Install dependencies
+#### Install with development tools
 ```
-pip install -r requirements.txt
+make install
 ```
 
 ## Usage 🚀
@@ -91,28 +98,44 @@ We welcome contributions from the community! Here's how you can help:
 2. **Suggest Features**
    Propose new modules/improvements via Discussions
 
-### Development Workflow
+### Development Workflow 🛠️
 
 #### 1. Fork and clone the repository
 ```
 git clone https://github.com/Git-Yousfi-Neji/NetArmageddon.git
 ```
-#### 2. Create feature branch
+#### 2. Set up development environment
+```
+make install
+```
+#### 3. Create feature branch
 ```
 git checkout -b feature/awesome-feature
 ```
-#### 3. Install dev dependencies
+#### 4. Install dev dependencies
 ```
 pip install -r dev-requirements.txt
 ```
-#### 4. Commit changes with semantic messages
+#### 5. Commit changes with semantic messages
 ```
 git commit -m "feat: add packet validation system"
 ```
-#### 5. Push and open PR
+#### 6. Push and open PR
 ```
 git push origin feature/awesome-feature
 ```
+
+### Code Quality Requirements:
+
+> - 100% type coverage with mypy
+
+> - Black-formatted code
+
+> - Passing flake8 checks
+
+> - Documented public APIs
+
+> - Test coverage for new features
 
 ## License 📜
 This project is licensed under [LICENSE](LICENSE)
