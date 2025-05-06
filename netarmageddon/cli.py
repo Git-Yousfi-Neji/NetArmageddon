@@ -5,6 +5,8 @@ import sys
 import time
 from typing import List
 
+from netarmageddon.config.config_loader import ConfigLoader
+
 from .core import ARPKeepAlive, DHCPExhaustion
 from .core.base_attack import BaseAttack
 
@@ -105,14 +107,18 @@ def main() -> None:
     # DHCP attack subcommand
     dhcp_parser = subparsers.add_parser("dhcp", help="DHCP exhaustion attack")
     dhcp_parser.add_argument(
-        "-i", "--interface", required=True, help="Network interface to use"
+        "-i",
+        "--interface",
+        required=True,
+        default=ConfigLoader.get("attacks", "dhcp", "default_interface", default="lo"),
+        help="Network interface to use",
     )
 
     dhcp_parser.add_argument(
         "-n",
         "--num-devices",
         type=int,
-        default=50,
+        default=ConfigLoader.get("attacks", "dhcp", "default_num_devices", default=50),
         help="Number of fake devices to simulate",
     )
 
@@ -120,7 +126,9 @@ def main() -> None:
         "-O",
         "--request-options",
         type=parse_option_range,
-        default=list(range(81)),  # Default 0-80
+        default=ConfigLoader.get(
+            "attacks", "dhcp", "default_request_options", default="1,5,9"
+        ),
         help='Comma-separated DHCP options to request (e.g. "1,3,6" or "1-10,15")',
     )
 
@@ -128,6 +136,7 @@ def main() -> None:
         "-s",
         "--client-src",
         type=lambda x: x.split(","),
+        default=ConfigLoader.get("attacks", "dhcp", "default_client_src", default=[]),
         help="Comma-separated list of MAC addresses to cycle through",
     )
 
@@ -135,25 +144,36 @@ def main() -> None:
     arp_parser = subparsers.add_parser("arp", help="Maintain devices in ARP tables")
 
     arp_parser.add_argument(
-        "-i", "--interface", required=True, help="Network interface to use (e.g., eth0)"
+        "-i",
+        "--interface",
+        required=True,
+        default=ConfigLoader.get("attacks", "arp", "default_interface", default="lo"),
+        help="Network interface to use (e.g., eth0)",
     )
 
     arp_parser.add_argument(
-        "-b", "--base-ip", required=True, help="Base IP address (e.g., 192.168.1.)"
+        "-b",
+        "--base-ip",
+        default=ConfigLoader.get(
+            "attacks", "arp", "default_base_ip", default="192.168.1."
+        ),
+        help="Base IP address (e.g., 192.168.1.)",
     )
 
     arp_parser.add_argument(
         "-n",
         "--num-devices",
         type=int,
-        default=50,
+        default=ConfigLoader.get("attacks", "arp", "default_num_devices", default=50),
         help="Number of devices to maintain",
     )
 
     arp_parser.add_argument(
         "-m",
         "--mac-prefix",
-        default="02:00:00",
+        default=ConfigLoader.get(
+            "attacks", "arp", "default_mac_prefix", default="de:ad:00"
+        ),
         help="MAC address prefix (default: 02:00:00)",
     )
 
@@ -161,7 +181,7 @@ def main() -> None:
         "-t",
         "--interval",
         type=float,
-        default=5.0,
+        default=ConfigLoader.get("attacks", "arp", "default_interval", default=5.0),
         help="Seconds between each ARP burst (default: 5.0)",
     )
 
@@ -169,7 +189,7 @@ def main() -> None:
         "-c",
         "--cycles",
         type=int,
-        default=1,
+        default=ConfigLoader.get("attacks", "arp", "default_cycles", default=1),
         help="Number of ARP announcement cycles to perform (default: 1)",
     )
 
