@@ -2,6 +2,7 @@
 
 install:
 	@pip install -r requirements.txt -r dev-requirements.txt -e .
+	@sudo apt-get install libpcap-dev
 	@pre-commit install
 
 format:

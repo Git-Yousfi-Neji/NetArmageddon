@@ -9,3 +9,10 @@ attacks:
     default_mac_prefix: "de:ad:00"
     default_interval: 5.0
     default_cycles: 1
+  traffic:
+    default_bpf_filter: "tcp port 80"
+    default_output_file: "capture.pcap"
+    default_duration: 0
+    default_count: 0
+    default_snaplen: 65535
+    default_promisc: True

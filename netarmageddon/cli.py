@@ -6,6 +6,7 @@ import time
 from typing import List
 
 from netarmageddon.config.config_loader import ConfigLoader
+from netarmageddon.core.traffic import _lib, start_capture_from_args
 
 from .core import ARPKeepAlive, DHCPExhaustion
 from .core.base_attack import BaseAttack
@@ -193,6 +194,72 @@ def main() -> None:
         help="Number of ARP announcement cycles to perform (default: 1)",
     )
 
+    # TRAFFIC-LOGGER subcommand
+    traffic_parser = subparsers.add_parser(
+        "traffic", help="Capture live packets to a PCAP file"
+    )
+
+    traffic_parser.add_argument(
+        "-i",
+        "--interface",
+        required=True,
+        default=ConfigLoader.get(
+            "attacks", "traffic", "default_interface", default="lo"
+        ),
+        help="Network interface to capture on (e.g. eth0, wlan0)",
+    )
+
+    traffic_parser.add_argument(
+        "-f",
+        "--filter",
+        default=ConfigLoader.get(
+            "attacks", "traffic", "default_filter", default="tcp port 80"
+        ),
+        help="BPF filter expression (e.g. 'tcp port 80')",
+    )
+
+    traffic_parser.add_argument(
+        "-o",
+        "--output",
+        required=True,
+        default=ConfigLoader.get(
+            "attacks", "traffic", "default_output_file", default="capture.pcap"
+        ),
+        help="Output PCAP filename (e.g. capture.pcap)",
+    )
+
+    traffic_parser.add_argument(
+        "-d",
+        "--duration",
+        type=int,
+        default=ConfigLoader.get("attacks", "traffic", "default_duration", default=0),
+        help="Capture duration in seconds (0 = until stopped)",
+    )
+
+    traffic_parser.add_argument(
+        "-c",
+        "--count",
+        type=int,
+        default=ConfigLoader.get("attacks", "traffic", "default_count", default=0),
+        help="Maximum number of packets to capture (0 = unlimited)",
+    )
+
+    traffic_parser.add_argument(
+        "--snaplen",
+        type=int,
+        default=ConfigLoader.get(
+            "attacks", "traffic", "default_snaplen", default=65535
+        ),
+        help="Snapshot length (bytes per packet)",
+    )
+
+    traffic_parser.add_argument(
+        "--promisc",
+        action="store_true",
+        default=ConfigLoader.get("attacks", "traffic", "default_promisc", default=True),
+        help="Enable promiscuous mode on capture interface",
+    )
+
     args = parser.parse_args()
 
     try:
@@ -214,6 +281,18 @@ def main() -> None:
                 interval=args.interval,
                 cycles=args.cycles,
             )
+        elif args.command == "traffic":
+            try:
+                start_capture_from_args(args)
+            except KeyboardInterrupt:
+                _lib.traffic_capture_stop()
+                logging.info("\nAttack stopped by user")
+                exit(1)
+            except Exception as e:
+                logging.error(f"Critical error: {str(e)}")
+                exit(1)
+
+            # block until duration/count expires or Ctrl-C
 
         with attack:
             while attack.running:
