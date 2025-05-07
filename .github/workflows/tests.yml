@@ -7,29 +7,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
       - name: Clean Python cache
         run: |
           pip cache purge
 
+      - name: Clean everything
+        run: |
+          make clean
+
       - name: Install dependencies
-        run: make install
+        run: |
+          make install
 
       - name: Check formatting
         run: |
           make format
+          make c-format
           git diff --exit-code --name-only
 
       - name: Run linters
         env:
           SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
-        run: make lint
+        run: |
+          make lint
+          make c-lint
 
       - name: Run tests with coverage
         run: |
           make test
-          make ci-test
+          make c-test

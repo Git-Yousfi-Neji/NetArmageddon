@@ -14,5 +14,5 @@ attacks:
     default_output_file: "capture.pcap"
     default_duration: 0
     default_count: 0
-    default_snaplen: 65535
+    default_snaplen: 0
     default_promisc: True

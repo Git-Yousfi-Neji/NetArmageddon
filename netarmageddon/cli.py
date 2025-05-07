@@ -6,7 +6,7 @@ import time
 from typing import List
 
 from netarmageddon.config.config_loader import ConfigLoader
-from netarmageddon.core.traffic import _lib, start_capture_from_args
+from netarmageddon.core.traffic import TrafficLogger
 
 from .core import ARPKeepAlive, DHCPExhaustion
 from .core.base_attack import BaseAttack
@@ -245,6 +245,7 @@ def main() -> None:
     )
 
     traffic_parser.add_argument(
+        "-s",
         "--snaplen",
         type=int,
         default=ConfigLoader.get(
@@ -254,6 +255,7 @@ def main() -> None:
     )
 
     traffic_parser.add_argument(
+        "-p",
         "--promisc",
         action="store_true",
         default=ConfigLoader.get("attacks", "traffic", "default_promisc", default=True),
@@ -282,17 +284,15 @@ def main() -> None:
                 cycles=args.cycles,
             )
         elif args.command == "traffic":
-            try:
-                start_capture_from_args(args)
-            except KeyboardInterrupt:
-                _lib.traffic_capture_stop()
-                logging.info("\nAttack stopped by user")
-                exit(1)
-            except Exception as e:
-                logging.error(f"Critical error: {str(e)}")
-                exit(1)
-
-            # block until duration/count expires or Ctrl-C
+            attack = TrafficLogger(
+                interface=args.interface,
+                bpf_filter=args.filter,
+                output_file=args.output,
+                duration=args.duration,
+                count=args.count,
+                snaplen=args.snaplen,
+                promisc=args.promisc,
+            )
 
         with attack:
             while attack.running:
