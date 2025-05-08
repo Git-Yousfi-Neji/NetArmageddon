@@ -30,6 +30,16 @@
 | `-s/ --snaplens` | Snapshot length per packet (default: 0) |
 | `-p/ --promisc` | Enable promiscuous mode (default: True) |
 
+| Option               | Description                                            |
+|----------------------|--------------------------------------------------------|
+| `-i, --interface`    | Network interface to capture on (e.g. `eth0`)         |
+| `-f, --filter`       | BPF filter expression (default: tcp port 80)    |
+| `-o, --output`       | Output PCAP filename (e.g. `capture.pcap`)            |
+| `-d, --duration`     | Capture duration in seconds (0 = run until stopped)   |
+| `-c, --count`        | Max packets to capture (0 = unlimited)                |
+| `-s, --snaplen`      | Snapshot length (bytes per packet; default: 0)    |
+| `-p, --promisc`      | Enable promiscuous mode on the interface (default: True) |
+
 ## Basic Commands
 
 # DHCP Exhaustion (50 devices)
@@ -92,4 +102,4 @@ sudo python -m netarmageddon traffic -i eth0 -f "tcp port 80" -o capture.pcap -d
 - Automatic rate limiting (max 100 packets/sec)
 - Interface validation
 - Input validation for MAC/IP formats
-- Clean thread termination and graceful shutdown on CTRL+C
+- Clean thread termination and graceful shutdown on CTRLC

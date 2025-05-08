@@ -25,6 +25,9 @@ graph TD
 - **Concrete Implementations**
   - `DHCPExhaustion`
   - `ARPKeepAlive`
+  - `TrafficLogger` (New)
+    - Uses libpcap (`pcap_open_live`, `pcap_compile`, `pcap_dump_open`)
+    - Supports BPF filters, duration and packet-count limits, snaplen, promiscuous mode
   - `ICMPFlooder` (Planned)
 
 ### 2. Network Utilities
