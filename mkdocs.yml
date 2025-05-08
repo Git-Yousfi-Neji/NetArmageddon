@@ -1,9 +1,12 @@
 site_name: NetArmageddon
 nav:
-  - Home: index.md
+  - Home: README.md
   - Usage: usage.md
   - Development: development.md
   - API Reference: api.md
+  - Architecture: architecture.md
+  - Testing Strategy: testing.md
+  - Contributing: CONTRIBUTING.md
 
 theme:
   name: material
