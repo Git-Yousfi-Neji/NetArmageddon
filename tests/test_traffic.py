@@ -87,21 +87,29 @@ def test_traffic_capture_error(traffic_logger, caplog):
 
 
 def test_duration_handling(traffic_logger):
-    with (
-        patch("netarmageddon.core.traffic._traffic_lib") as mock_lib,
-        patch("time.sleep") as mock_sleep,
-    ):
-        # Configure mock
-        mock_lib.traffic_capture_start.return_value = 0
-        traffic_logger.duration = 1  # Must be integer
+    with patch("netarmageddon.core.traffic._traffic_lib") as mock_lib, patch(
+        "time.sleep"
+    ) as mock_sleep:
+        # 1) Block the capture thread so running=True persists
+        done = threading.Event()
+        mock_lib.traffic_capture_start.side_effect = (
+            lambda cfg: done.wait(timeout=5) or 0
+        )
 
-        # Run test
+        traffic_logger.duration = 1
         traffic_logger.start()
 
-        # Simulate timer thread execution
+        # 2) Clear any prior sleep calls
+        mock_sleep.reset_mock()
+
+        # 3) Invoke the timer logic
         traffic_logger._stop_after_delay()
 
-        # Verify interactions
-        mock_lib.traffic_capture_stop.assert_called_once()
+        # 4) Now exactly one sleep should have occurred
         mock_sleep.assert_called_once_with(1)
+        mock_lib.traffic_capture_stop.assert_called_once()
+
+        # 5) Clean up
+        done.set()
+        traffic_logger.capture_thread.join(timeout=1)
         assert not traffic_logger.running
