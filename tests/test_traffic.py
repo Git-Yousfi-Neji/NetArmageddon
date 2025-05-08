@@ -87,9 +87,10 @@ def test_traffic_capture_error(traffic_logger, caplog):
 
 
 def test_duration_handling(traffic_logger):
-    with patch("netarmageddon.core.traffic._traffic_lib") as mock_lib, patch(
-        "time.sleep"
-    ) as mock_sleep:
+    with (
+        patch("netarmageddon.core.traffic._traffic_lib") as mock_lib,
+        patch("time.sleep") as mock_sleep,
+    ):
         # 1) Block the capture thread so running=True persists
         done = threading.Event()
         mock_lib.traffic_capture_start.side_effect = (
