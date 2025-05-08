@@ -40,4 +40,4 @@ jobs:
       - name: Run tests with coverage
         run: |
           make test
-          make c-test
+          sudo make c-test
