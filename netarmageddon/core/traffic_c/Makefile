@@ -38,4 +38,4 @@ lint:
 	  --quiet
 
 clean:
-	-rm -f $(OBJ) $(TARGET) $(TEST_EXE) $(TEST_PCAP) compile_commands.json
+	-rm -f $(OBJ) $(TARGET) $(TEST_EXE) $(TEST_PCAP) $(COMPILE_COMMANDS)
