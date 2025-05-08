@@ -174,5 +174,9 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# object files
+# C artifacts
+netarmageddon/core/traffic_c/compile_commands.json
+netarmageddon/core/traffic_c/tests/test_traffic
+netarmageddon/core/traffic_c/test.pcap
 netarmageddon/core/traffic_c/*.o
+netarmageddon/core/traffic_c/*.so

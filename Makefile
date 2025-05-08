@@ -8,6 +8,9 @@ YELLOW := \033[0;33m
 RED    := \033[0;31m
 RESET  := \033[0m
 
+C_SRC_DIR = netarmageddon/core/traffic_c
+COMPILE_COMMANDS = compile_commands.json
+
 .PHONY: all c-clean c-build install format lint test docs_build docs_serve c-test help
 
 all: clean c-clean install format c-format lint c-lint c-build test c-test docs_build
@@ -26,9 +29,9 @@ clean:
 	@rm -rf htmlcov
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
-	@echo "$(RED)→ Removing C build artifacts (netarmageddon/core/traffic_c)…$(RESET)"
-	@$(MAKE) -C netarmageddon/core/traffic_c clean
-	@rm -f netarmageddon/core/traffic_c/compile_commands.json
+	@echo "$(RED)→ Removing C build artifacts ($(C_SRC_DIR))…$(RESET)"
+	@$(MAKE) -C $(C_SRC_DIR) clean
+	@rm -f $(wildcard $(C_SRC_DIR)/$(COMPILE_COMMANDS))
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
 	@echo "$(RED)→ Removing documentation build…$(RESET)"
@@ -50,19 +53,19 @@ clean:
 
 c-clean:
 	@echo "$(RED)→ Cleaning C traffic logger…$(RESET)"
-	@$(MAKE) -C netarmageddon/core/traffic_c clean
+	@$(MAKE) -C $(C_SRC_DIR) clean
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
 # Generate compile_commands.json needed for c-lint
 compile_commands:
 	@echo "$(BLUE)→ Generating compile_commands.json…$(RESET)"
-	@bear --append -- make -C netarmageddon/core/traffic_c
-	@mv compile_commands.json netarmageddon/core/traffic_c/compile_commands.json
+	@bear --append -- make -C $(C_SRC_DIR)
+	@mv $(COMPILE_COMMANDS) $(C_SRC_DIR)/$(COMPILE_COMMANDS)
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
 c-build: compile_commands
 	@echo "$(GREEN)→ Building C traffic logger…$(RESET)"
-	@$(MAKE) -C netarmageddon/core/traffic_c
+	@$(MAKE) -C $(C_SRC_DIR)
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
 install:
@@ -85,7 +88,7 @@ format:
 
 c-format:
 	@echo "$(BLUE)→ Formatting C files with clang-format…$(RESET)"
-	@find netarmageddon/core/traffic_c -name '*.[ch]' -exec clang-format -i {} +
+	@$(MAKE) -C $(C_SRC_DIR) format
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
 lint:
@@ -97,11 +100,7 @@ lint:
 
 c-lint: compile_commands
 	@echo "$(BLUE)→ Linting C files with clang-tidy…$(RESET)"
-	@cd netarmageddon/core/traffic_c && \
-		clang-tidy traffic.c \
-		-p . \
-		--header-filter='.*' \
-		--quiet
+	@$(MAKE) -C $(C_SRC_DIR) lint
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
 test: c-clean c-build
@@ -111,7 +110,7 @@ test: c-clean c-build
 
 c-test: c-clean c-build
 	@echo "$(GREEN)→ Running C tests…$(RESET)"
-	@$(MAKE) -C netarmageddon/core/traffic_c test
+	@$(MAKE) -C $(C_SRC_DIR) test
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
 docs_build:
