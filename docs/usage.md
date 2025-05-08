@@ -19,6 +19,17 @@
 | `-t/--interval` | Announcement interval (default: 5) |
 | `-c/ --cycles` | Number of ARP announcement cycles to perform (default: 1) |
 
+### Traffic Capture
+| Option | Description |
+|--------|-------------|
+| `-i/--interface` | Network interface (required) |
+| `-f/--filter` | BPF filter expression (default: tcp port 80) |
+| `-o/--noutput` | Output PCAP filename (default: capture.pcap) |
+| `-d/--duration` | Capture duration in seconds (default: 0) |
+| `-c/ --count` | Max packets to capture (default: 0) |
+| `-s/ --snaplens` | Snapshot length per packet (default: 0) |
+| `-p/ --promisc` | Enable promiscuous mode (default: True) |
+
 ## Basic Commands
 
 # DHCP Exhaustion (50 devices)
@@ -68,6 +79,13 @@ sudo python -m netarmageddon arp -i eth0 -b 192.168.1. -n 100  -m de:ad:00 -t 10
 # Multiple cycles
 ```
 sudo python -m netarmageddon arp -i eth0 -b 10.0.0. -n 3 -m 02:00:00 -t 2.5 -c 2
+```
+
+## Traffic Capture
+
+Capture live network traffic to a PCAP file:
+```
+sudo python -m netarmageddon traffic -i eth0 -f "tcp port 80" -o capture.pcap -d 60 -c 1000 -s 1514 --p True
 ```
 
 ## Safety Features

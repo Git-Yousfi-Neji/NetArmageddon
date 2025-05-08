@@ -110,7 +110,7 @@ test: c-clean c-build
 
 c-test: c-clean c-build
 	@echo "$(GREEN)→ Running C tests…$(RESET)"
-	@$(MAKE) -C $(C_SRC_DIR) test
+	@sudo $(MAKE) -C $(C_SRC_DIR) test
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
 docs_build:
