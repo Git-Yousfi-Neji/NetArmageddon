@@ -29,10 +29,13 @@ test: $(TEST_EXE)
 	LD_LIBRARY_PATH=. $(TEST_EXE)
 
 format:
-	@clang-format -i traffic.c traffic.h $(TEST_SRC)
+	@clang-format -i \
+	--style=file \
+	traffic.c traffic.h $(TEST_SRC)
 
 lint:
 	@clang-tidy traffic.c traffic.h \
+	--config-file=.clang-tidy \
 	  -p . \
 	  --header-filter='.*' \
 	  --quiet

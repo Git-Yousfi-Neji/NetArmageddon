@@ -50,7 +50,7 @@ cd NetArmageddon
 
 #### Install with development tools
 ```
-make install
+make
 ```
 
 ## Usage 🚀

@@ -6,6 +6,9 @@
 
 #include "../traffic.h"
 
+#define SNAPLEN 65535
+#define DELAY_MS 200000
+
 static void* capture_thread_wrapper(void* arg) {
     traffic_capture_config_t* cfg = (traffic_capture_config_t*)arg;
     int* result = malloc(sizeof(int));
@@ -19,7 +22,7 @@ START_TEST(test_valid_capture_config) {
                                     .output_file = "test.pcap",
                                     .duration = 2,
                                     .max_packets = 1,
-                                    .snaplen = 65535,
+                                    .snaplen = SNAPLEN,
                                     .promisc = 1};
 
     pthread_t capture_thread;
@@ -27,7 +30,7 @@ START_TEST(test_valid_capture_config) {
 
     pthread_create(&capture_thread, NULL, capture_thread_wrapper, &cfg);
 
-    usleep(200000);  // 200ms delay
+    usleep(DELAY_MS);
 
     int __attribute__((unused)) ping_ret = system("ping -c 2 127.0.0.1 > /dev/null 2>&1");
     pthread_join(capture_thread, (void**)&result_ptr);
@@ -46,7 +49,7 @@ START_TEST(test_invalid_interface) {
                                     .output_file = "test.pcap",
                                     .duration = 1,
                                     .max_packets = 1,
-                                    .snaplen = 65535,
+                                    .snaplen = SNAPLEN,
                                     .promisc = 0};
 
     int result = traffic_capture_start(&cfg);
@@ -58,30 +61,30 @@ START_TEST(test_invalid_interface) {
 END_TEST
 
 Suite* traffic_suite(void) {
-    Suite* s;
+    Suite* suite;
     TCase* tc_core;
 
-    s = suite_create("Traffic");
+    suite = suite_create("Traffic");
     tc_core = tcase_create("Core Tests");
 
     tcase_add_test(tc_core, test_valid_capture_config);
     tcase_add_test(tc_core, test_invalid_interface);
-    suite_add_tcase(s, tc_core);
+    suite_add_tcase(suite, tc_core);
 
-    return s;
+    return suite;
 }
 
 int main(void) {
     int number_failed;
-    Suite* s;
-    SRunner* sr;
+    Suite* suite;
+    SRunner* sru;
 
-    s = traffic_suite();
-    sr = srunner_create(s);
+    suite = traffic_suite();
+    sru = srunner_create(suite);
 
-    srunner_run_all(sr, CK_NORMAL);
-    number_failed = srunner_ntests_failed(sr);
-    srunner_free(sr);
+    srunner_run_all(sru, CK_NORMAL);
+    number_failed = srunner_ntests_failed(sru);
+    srunner_free(sru);
 
     return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

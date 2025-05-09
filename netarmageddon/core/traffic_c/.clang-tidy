@@ -1,0 +1,14 @@
+Checks: >
+  -*,
+  clang-analyzer-*,
+  bugprone-*,
+  modernize-*,
+  performance-*,
+  portability-*,
+  readability-*,
+WarningsAsErrors: false
+CheckOptions:
+  - key: modernize-use-trailing-return-type.IgnoreMacros
+    value: true
+  - key: readability-identifier-length.MinVariableNameLength
+    value: 2

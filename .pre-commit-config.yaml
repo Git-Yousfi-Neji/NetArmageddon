@@ -31,15 +31,22 @@ repos:
     rev: v14.0.0
     hooks:
       - id: clang-format
+        args: [-i, -style=file]
+        files: netarmageddon/core/traffic_c/.*\.(c|h)$
         additional_dependencies: ['clang-format==14.0.0']
-        args: [-i]
-        files: \.c$|\.h$
+        exclude: \.(o|so|pcap)$
 
   - repo: local
     hooks:
       - id: clang-tidy
         name: clang-tidy
         entry: clang-tidy
+        args: [
+          --config-file=netarmageddon/core/traffic_c/.clang-tidy,
+          -p=netarmageddon/core/traffic_c,
+          --extra-arg=-Wno-unknown-warning-option,
+          --extra-arg=-Wno-unused-command-line-argument
+        ]
         language: system
-        types: [c]
-        files: \.c$
+        files: netarmageddon/core/traffic_c/.*\.(c|h)$
+        working_dir: netarmageddon/core/traffic_c

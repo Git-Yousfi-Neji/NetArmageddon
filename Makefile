@@ -70,8 +70,9 @@ c-build: compile_commands
 
 install:
 	@echo "$(BLUE)→ Installing dependencies…$(RESET)"
-	@pip install -r requirements.txt -r dev-requirements.txt -e .
 	@sudo apt-get update
+	@python3 -m pip install --upgrade pip
+	@pip install -r requirements.txt -r dev-requirements.txt -e .
 	@sudo apt-get install -y libpcap-dev
 	@sudo apt-get install -y clang-format
 	@sudo apt-get install -y clang-tidy
