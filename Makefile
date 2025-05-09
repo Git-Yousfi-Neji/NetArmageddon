@@ -99,7 +99,7 @@ lint:
 	@safety scan || echo "$(YELLOW)Safety scan skipped$(RESET)"
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
-c-lint: c-build
+c-lint: c-clean c-build
 	@echo "$(BLUE)→ Linting C files with clang-tidy…$(RESET)"
 	@$(MAKE) -C $(C_SRC_DIR) lint
 	@echo "$(GREEN)→→ DONE!$(RESET)"

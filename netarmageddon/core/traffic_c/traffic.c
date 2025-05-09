@@ -8,9 +8,11 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
-#define ERRBUF_SIZE 256
-#define PCAP_TIMEOUT_MS 1000
-#define MICROSECONDS_IN_SECOND 1000000.0
+enum {
+    ERRBUF_SIZE = 256,
+    PCAP_TIMEOUT_MS = 1000,
+};
+static const double MICROSECONDS_IN_SECOND = 1000000.0;
 
 static pcap_t *pcap_handle = NULL;
 static pcap_dumper_t *pcap_dumper = NULL;

@@ -82,13 +82,13 @@ sudo python -m netarmageddon dhcp -i eth0 -O 1,3,6,15 -n 5
 ```
 
 #### Traffic Capture (HTTP traffic, 60 seconds)
-
+```
 sudo python -m netarmageddon traffic -i eth0 -f "tcp port 80" -o web.pcap -d 60
-
+```
 #### Continuous Packet Capture
-
+```
 sudo python -m netarmageddon traffic -i wlan0 -o full_capture.pcap -d 0
-
+```
 ## Documentation 📚
 
 Explore comprehensive project documentation to understand implementation details and usage:
@@ -138,7 +138,7 @@ git commit -m "feat: add packet validation system"
 git push origin feature/awesome-feature
 ```
 
-### Code Quality Requirements:
+### Code Quality Requirements
 
 > - 100% type coverage with mypy
 
