@@ -137,9 +137,7 @@ git commit -m "feat: add packet validation system"
 ```
 git push origin feature/awesome-feature
 ```
-
 ### Code Quality Requirements
-
 > - 100% type coverage with mypy
 
 > - Black-formatted code

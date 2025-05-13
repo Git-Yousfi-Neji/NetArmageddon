@@ -78,6 +78,9 @@ install:
 	@sudo apt-get install -y clang-tidy
 	@sudo apt-get install -y bear
 	@sudo apt-get install -y check
+	@sudo apt-get install -y libnl-3-dev
+	@sudo apt-get install -y libnl-genl-3-dev
+	@sudo apt-get install -y linux-headers-$(uname -r)
 	@pre-commit install
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
