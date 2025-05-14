@@ -26,34 +26,20 @@ def configure_logging() -> None:
     )
 
 
-def parse_mac_address(arg_list: List[str]) -> argparse.Namespace:
-    """
-    Normalizes MAC addresses (converts '-' to ':').
-    """
-    parser = argparse.ArgumentParser(
-        prog="netarmageddon dhcp", description="DHCP exhaustion attack arguments"
-    )
+def validate_mac(mac: str) -> str:
+    """Validate MAC address format"""
+    mac = mac.strip().lower()
+    if len(mac) != 17:
+        raise argparse.ArgumentTypeError("Invalid MAC length")
 
-    parser.add_argument(
-        "-s",
-        "--client-src",
-        type=lambda x: x.split(","),
-        default=[],
-        help="Comma-separated list of MAC addresses to cycle through",
-    )
+    parts = mac.split(":")
+    if len(parts) != 6:
+        raise argparse.ArgumentTypeError("Invalid MAC format")
 
-    args = parser.parse_args(arg_list)
+    if not all(len(p) == 2 and p.isalnum() for p in parts):
+        raise argparse.ArgumentTypeError("Invalid MAC characters")
 
-    # Normalize any hyphens in MAC addresses to colons
-    if args.client_src:
-        normalized = []
-        for mac in args.client_src:
-            # convert AA-BB-CC-DD-EE-FF → aa:bb:cc:dd:ee:ff
-            m = mac.strip().lower().replace("-", ":")
-            normalized.append(m)
-        args.client_src = normalized
-
-    return args
+    return mac
 
 
 def parse_option_range(option_str: str) -> List[int]:
@@ -314,6 +300,7 @@ def main() -> None:
         action="store",
         metavar="MAC",
         default=ConfigLoader.get("attacks", "deauth", "default_clients", default=None),
+        type=lambda x: [validate_mac(m) for m in x.split(",")],
         dest="custom_client_macs",
         required=False,
     )

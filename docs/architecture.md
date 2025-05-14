@@ -25,9 +25,10 @@ graph TD
 - **Concrete Implementations**
   - `DHCPExhaustion`
   - `ARPKeepAlive`
-  - `TrafficLogger` (New)
+  - `TrafficLogger`
     - Uses libpcap (`pcap_open_live`, `pcap_compile`, `pcap_dump_open`)
     - Supports BPF filters, duration and packet-count limits, snaplen, promiscuous mode
+  - Deauth (Wi-Fi deauthentication attack module) (New)
   - `ICMPFlooder` (Planned)
 
 ### 2. Network Utilities

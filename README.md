@@ -29,6 +29,7 @@ A network stress testing framework for simulating device connections and evaluat
 - [x] **BPF Filter Support**: Precise traffic selection using Berkeley Packet Filters
 - [x] **Capture Limits**: Configurable duration and packet count thresholds
 - [x] **Promiscuous Mode**: Optional interface promiscuity for full traffic visibility
+- [x] **Deauthentication Attack**: Perform Wi-Fi deauth attacks targeting access points and clients
 - [ ] **Bug fixing**: Working on issue fixing
 
 ## Warning ⚠️
@@ -89,6 +90,21 @@ sudo python -m netarmageddon traffic -i eth0 -f "tcp port 80" -o web.pcap -d 60
 ```
 sudo python -m netarmageddon traffic -i wlan0 -o full_capture.pcap -d 0
 ```
+#### Deauthentication Attack
+###### Target specific client MAC
+```
+sudo python -m netarmageddon deauth \
+    -i wlan0 \
+    --clients AA:BB:CC:DD:EE:FF
+```
+###### Deauth all clients across all channels, skip monitor-mode check, and kill NetManager service
+```
+sudo python -m netarmageddon deauth \
+    -i wlan0 \
+    --deauth-all-channels \
+    --skip-monitormode \
+    --kill
+```
 ## Documentation 📚
 
 Explore comprehensive project documentation to understand implementation details and usage:
@@ -138,15 +154,15 @@ git commit -m "feat: add packet validation system"
 git push origin feature/awesome-feature
 ```
 ### Code Quality Requirements
-> - 100% type coverage with mypy
+- 100% type coverage with mypy
 
-> - Black-formatted code
+- Black-formatted code
 
-> - Passing flake8 checks
+- Passing flake8 checks
 
-> - Documented public APIs
+- Documented public APIs
 
-> - Test coverage for new features
+- Test coverage for new features
 
 ## License 📜
 This project is licensed under [LICENSE](LICENSE)

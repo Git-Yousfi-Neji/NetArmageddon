@@ -47,3 +47,41 @@ class TrafficLogger(BaseAttack):
         promisc: Enable interface promiscuous mode.
     """
 ```
+### `Deauth`
+```python
+class Deauth(BaseAttack):
+    def __init__(
+        self,
+        interface: str,
+        *,
+        clients: Optional[str] = None,
+        skip_monitormode: bool = False,
+        kill: bool = False,
+        deauth_all_channels: bool = False,
+        channels: Optional[str] = None,
+        ssid: Optional[str] = None,
+        bssid: Optional[str] = None,
+        autostart: bool = False,
+        dry_run: bool = False,
+        debug: bool = False,
+    ) -> None
+
+    def run(self): -> None
+
+    """
+    Perform a Wi-Fi deauthentication attack against an AP or specific clients.
+
+    Args:
+        interface: Wireless interface in monitor mode (e.g., "wlan0mon").
+        clients: Comma-separated list of client MAC addresses to target.
+        skip_monitormode: Assume interface already in monitor mode.
+        kill: Stop NetworkManager before attack.
+        deauth_all_channels: Cycle through all channels for broadcast deauth.
+        channels: Comma-separated list of specific channels to target.
+        ssid: Custom SSID filter to attack only a named network.
+        bssid: Custom BSSID filter to attack only a specific AP.
+        autostart: Automatically select the only found AP without prompt.
+        dry_run: Do not actually send packets; simulate only.
+        debug: Enable verbose debug output.
+    """
+```

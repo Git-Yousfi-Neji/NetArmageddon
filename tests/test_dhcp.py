@@ -7,7 +7,7 @@ from scapy.layers.inet import IP, UDP
 from scapy.layers.l2 import Ether
 from scapy.packet import Packet
 
-from netarmageddon.cli import parse_mac_address, parse_option_range
+from netarmageddon.cli import parse_option_range
 from netarmageddon.core.dhcp_exhaustion import DHCPExhaustion
 
 
@@ -102,15 +102,6 @@ def test_mac_cycling() -> None:
         "aa:bb:cc:dd:ee:ff",
         "00:11:22:33:44:55",
         "aa:bb:cc:dd:ee:ff",
-    ]
-
-
-def test_cli_mac_parsing() -> None:
-    args = parse_mac_address(["-s", "00:11:22:33:44:55,aa-bb-cc-dd-ee-ff , de:ad:22:33:44:55"])
-    assert args.client_src == [
-        "00:11:22:33:44:55",
-        "aa:bb:cc:dd:ee:ff",
-        "de:ad:22:33:44:55",
     ]
 
 

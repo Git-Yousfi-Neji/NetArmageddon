@@ -20,16 +20,6 @@
 | `-c/ --cycles` | Number of ARP announcement cycles to perform (default: 1) |
 
 ### Traffic Capture
-| Option | Description |
-|--------|-------------|
-| `-i/--interface` | Network interface (required) |
-| `-f/--filter` | BPF filter expression (default: tcp port 80) |
-| `-o/--noutput` | Output PCAP filename (default: capture.pcap) |
-| `-d/--duration` | Capture duration in seconds (default: 0) |
-| `-c/ --count` | Max packets to capture (default: 0) |
-| `-s/ --snaplens` | Snapshot length per packet (default: 0) |
-| `-p/ --promisc` | Enable promiscuous mode (default: True) |
-
 | Option               | Description                                            |
 |----------------------|--------------------------------------------------------|
 | `-i, --interface`    | Network interface to capture on (e.g. `eth0`)         |
@@ -39,6 +29,21 @@
 | `-c, --count`        | Max packets to capture (0 = unlimited)                |
 | `-s, --snaplen`      | Snapshot length (bytes per packet; default: 0)    |
 | `-p, --promisc`      | Enable promiscuous mode on the interface (default: True) |
+
+### Deauthentication Attack
+| Option                         | Description                                                                 |
+|--------------------------------|-----------------------------------------------------------------------------|
+| `-i, --interface`             | Wireless interface (monitor mode required)                                  |
+| `-c, --clients`               | Comma-separated list of client MACs to target (default: broadcast)         |
+| `-s, --skip-monitormode`          | Assume interface already in monitor mode (skip setup)                      |
+| `-k, --kill`                  | Kill NetworkManager before starting attack                                 |
+| `-d, --deauth-all-channels`   | Cycle through all supported channels for broadcast deauth                  |
+| `-C, --Channels`              | Comma-separated list of specific channels to target                        |
+| `-S, --SSID`                      | Only attack APs matching the given SSID                                    |
+| `-b, --BSSID`                     | Only attack AP with this specific BSSID                                    |
+| `-a, --autostart`                 | Skip interactive selection when exactly one AP is found                     |
+| `-D, --Debug`                     | Enable verbose debugging output                                             |
+
 
 ## Basic Commands
 
@@ -96,6 +101,31 @@ sudo python -m netarmageddon arp -i eth0 -b 10.0.0. -n 3 -m 02:00:00 -t 2.5 -c 2
 Capture live network traffic to a PCAP file:
 ```
 sudo python -m netarmageddon traffic -i eth0 -f "tcp port 80" -o capture.pcap -d 60 -c 1000 -s 1514 --p True
+```
+
+
+## Deauthentication
+
+# Broadcast deauth
+```
+sudo python -m netarmageddon deauth -i wlan0mon
+```
+
+# Target specific clients only, skip monitor setup, kill NetworkManager
+```
+sudo python -m netarmageddon deauth \
+    -i wlan0mon \
+    -c AA:BB:CC:DD:EE:FF,11:22:33:44:55:66 \
+    --skip-monitormode \
+    -k
+```
+
+# Cycle all channels with interactive AP selection
+```
+sudo python -m netarmageddon deauth \
+    -i wlan0mon \
+    --deauth-all-channels \
+    --channels 1,6,11
 ```
 
 ## Safety Features
