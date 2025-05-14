@@ -12,9 +12,7 @@ def test_config_loading() -> None:
     assert ConfigLoader.get("attacks", "arp", "default_base_ip").startswith("192.168.")
     assert ConfigLoader.get("attacks", "arp", "default_base_ip").endswith(".")
 
-    assert isinstance(
-        ConfigLoader.get("attacks", "dhcp", "default_client_src", default=[]), list
-    )
+    assert isinstance(ConfigLoader.get("attacks", "dhcp", "default_client_src", default=[]), list)
 
 
 def test_missing_config(monkeypatch) -> None:

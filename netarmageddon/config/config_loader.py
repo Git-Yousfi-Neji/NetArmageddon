@@ -38,11 +38,7 @@ class ConfigLoader:
 
         try:
             if section and attack and key:
-                return (
-                    cfg[section].get(attack, {}).get(key)
-                    or cfg[section].get(key)
-                    or default
-                )
+                return cfg[section].get(attack, {}).get(key) or cfg[section].get(key) or default
             elif section and key:
                 return cfg[section].get(key, default)
             else:

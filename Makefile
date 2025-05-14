@@ -84,13 +84,13 @@ install:
 	@pre-commit install
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
-format:c-clean
+format:
 	@echo "$(BLUE)→ Running formatters…$(RESET)"
 	@isort .
 	@black .
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
-c-format:c-clean
+c-format:
 	@echo "$(BLUE)→ Formatting C files with clang-format…$(RESET)"
 	@$(MAKE) -C $(C_SRC_DIR) format
 	@echo "$(GREEN)→→ DONE!$(RESET)"

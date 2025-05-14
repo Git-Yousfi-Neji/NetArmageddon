@@ -16,3 +16,13 @@ attacks:
     default_count: 0
     default_snaplen: 0
     default_promisc: True
+  deauth:
+    default_monitormode: False
+    default_kill: False
+    default_ssid: null
+    default_bssid: null
+    default_clients: null
+    default_channels: null
+    default_autostart: False
+    default_debug: False
+    default_deauth_all: False
