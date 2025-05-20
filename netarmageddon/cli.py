@@ -10,11 +10,27 @@ from netarmageddon.core.traffic import TrafficLogger
 
 from .core import ARPKeepAlive, DHCPExhaustion, Interceptor
 from .core.base_attack import BaseAttack
+from .utils.banners import (
+    get_arp_banner,
+    get_deauth_banner,
+    get_dhcp_banner,
+    get_general_banner,
+    get_traffic_banner,
+)
+from .utils.output_manager import (
+    BLUE,
+    BRIGHT_RED,
+    BRIGHT_YELLOW,
+    GREEN,
+    RESET,
+    WARNING,
+    ColorfulHelpFormatter,
+)
 
 
 def check_root_privileges() -> None:
     if os.geteuid() != 0:
-        print("This script requires root privileges!")
+        print(f"{BRIGHT_RED}This script requires root privileges!{RESET}")
         sys.exit(1)
 
 
@@ -30,14 +46,14 @@ def validate_mac(mac: str) -> str:
     """Validate MAC address format"""
     mac = mac.strip().lower()
     if len(mac) != 17:
-        raise argparse.ArgumentTypeError("Invalid MAC length")
+        raise argparse.ArgumentTypeError(f"{BRIGHT_RED}Invalid MAC length{RESET}")
 
     parts = mac.split(":")
     if len(parts) != 6:
-        raise argparse.ArgumentTypeError("Invalid MAC format")
+        raise argparse.ArgumentTypeError(f"{BRIGHT_RED}Invalid MAC format{RESET}")
 
     if not all(len(p) == 2 and p.isalnum() for p in parts):
-        raise argparse.ArgumentTypeError("Invalid MAC characters")
+        raise argparse.ArgumentTypeError(f"{BRIGHT_RED}Invalid MAC characters{RESET}")
 
     return mac
 
@@ -53,7 +69,6 @@ def parse_option_range(option_str: str) -> List[int]:
     options: List[int] = []
     for part in option_str.split(","):
         if not part:
-            # catches cases like "1,,2"
             raise ValueError(f"Empty segment in option string: '{option_str}'")
 
         if "-" in part:
@@ -85,22 +100,31 @@ def main() -> None:
     configure_logging()
 
     parser = argparse.ArgumentParser(
-        description="NetArmageddon - Network Stress Testing Framework",
-        epilog="WARNING: Use only on networks you own and control!",
+        description=get_general_banner(),
+        epilog=f"{BRIGHT_RED}{BRIGHT_YELLOW}[WARNING] Use only on networks you own and control!{RESET}",
+        formatter_class=ColorfulHelpFormatter,
     )
 
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(
+        dest="command",
+        required=True,
+        title="Supported Features",
+    )
 
     # DHCP attack subcommand
-    dhcp_parser = subparsers.add_parser("dhcp", help="DHCP exhaustion attack")
+    dhcp_parser = subparsers.add_parser(
+        "dhcp",
+        help=f"{GREEN}DHCP exhaustion attack{RESET}",
+        description=get_dhcp_banner(),
+        formatter_class=ColorfulHelpFormatter,
+    )
     dhcp_parser.add_argument(
         "-i",
         "--interface",
         required=True,
         default=ConfigLoader.get("attacks", "dhcp", "default_interface", default="lo"),
-        help="Network interface to use",
+        help=f"Network interface to use ({BLUE}e.g. eth0{RESET})",
     )
-
     dhcp_parser.add_argument(
         "-n",
         "--num-devices",
@@ -108,41 +132,41 @@ def main() -> None:
         default=ConfigLoader.get("attacks", "dhcp", "default_num_devices", default=50),
         help="Number of fake devices to simulate",
     )
-
     dhcp_parser.add_argument(
         "-O",
         "--request-options",
         type=parse_option_range,
         default=ConfigLoader.get("attacks", "dhcp", "default_request_options", default="1,5,9"),
-        help='Comma-separated DHCP options to request (e.g. "1,3,6" or "1-10,15")',
+        help=f'Comma-separated DHCP options ({BLUE}e.g. "1,3,6" or "1-10,15"{RESET})',
     )
-
     dhcp_parser.add_argument(
         "-s",
         "--client-src",
         type=lambda x: x.split(","),
         default=ConfigLoader.get("attacks", "dhcp", "default_client_src", default=[]),
-        help="Comma-separated list of MAC addresses to cycle through",
+        help=f"Comma-separated list of {BLUE}MAC addresses{RESET} to cycle through",
     )
 
     # ARP attack subcommand
-    arp_parser = subparsers.add_parser("arp", help="Maintain devices in ARP tables")
-
+    arp_parser = subparsers.add_parser(
+        "arp",
+        help=f"{GREEN}Maintain devices in ARP tables{RESET}",
+        description=get_arp_banner(),
+        formatter_class=ColorfulHelpFormatter,
+    )
     arp_parser.add_argument(
         "-i",
         "--interface",
         required=True,
         default=ConfigLoader.get("attacks", "arp", "default_interface", default="lo"),
-        help="Network interface to use (e.g., eth0)",
+        help=f"Network interface ({BLUE}e.g. eth0{RESET})",
     )
-
     arp_parser.add_argument(
         "-b",
         "--base-ip",
         default=ConfigLoader.get("attacks", "arp", "default_base_ip", default="192.168.1."),
-        help="Base IP address (e.g., 192.168.1.)",
+        help=f"Base IP address ({BLUE}e.g. 192.168.1.{RESET})",
     )
-
     arp_parser.add_argument(
         "-n",
         "--num-devices",
@@ -150,48 +174,47 @@ def main() -> None:
         default=ConfigLoader.get("attacks", "arp", "default_num_devices", default=50),
         help="Number of devices to maintain",
     )
-
     arp_parser.add_argument(
         "-m",
         "--mac-prefix",
         default=ConfigLoader.get("attacks", "arp", "default_mac_prefix", default="de:ad:00"),
-        help="MAC address prefix (default: 02:00:00)",
+        help=f"MAC address prefix ({BLUE}default: de:ad:00{RESET})",
     )
-
     arp_parser.add_argument(
         "-t",
         "--interval",
         type=float,
         default=ConfigLoader.get("attacks", "arp", "default_interval", default=5.0),
-        help="Seconds between each ARP burst (default: 5.0)",
+        help="Seconds between ARP bursts",
     )
-
     arp_parser.add_argument(
         "-c",
         "--cycles",
         type=int,
         default=ConfigLoader.get("attacks", "arp", "default_cycles", default=1),
-        help="Number of ARP announcement cycles to perform (default: 1)",
+        help="Number of announcement cycles",
     )
 
-    # TRAFFIC-LOGGER subcommand
-    traffic_parser = subparsers.add_parser("traffic", help="Capture live packets to a PCAP file")
-
+    # Traffic-logger subcommand
+    traffic_parser = subparsers.add_parser(
+        "traffic",
+        help=f"{GREEN}Capture live packets to a PCAP file{RESET}",
+        description=get_traffic_banner(),
+        formatter_class=ColorfulHelpFormatter,
+    )
     traffic_parser.add_argument(
         "-i",
         "--interface",
         required=True,
         default=ConfigLoader.get("attacks", "traffic", "default_interface", default="lo"),
-        help="Network interface to capture on (e.g. eth0, wlan0)",
+        help=f"Network interface ({BLUE}e.g. eth0{RESET})",
     )
-
     traffic_parser.add_argument(
         "-f",
         "--filter",
         default=ConfigLoader.get("attacks", "traffic", "default_filter", default="tcp port 80"),
-        help="BPF filter expression (e.g. 'tcp port 80')",
+        help=f"BPF filter ({BLUE}e.g. 'tcp port 80'{RESET})",
     )
-
     traffic_parser.add_argument(
         "-o",
         "--output",
@@ -199,57 +222,50 @@ def main() -> None:
         default=ConfigLoader.get(
             "attacks", "traffic", "default_output_file", default="capture.pcap"
         ),
-        help="Output PCAP filename (e.g. capture.pcap)",
+        help="Output PCAP filename",
     )
-
     traffic_parser.add_argument(
         "-d",
         "--duration",
         type=int,
         default=ConfigLoader.get("attacks", "traffic", "default_duration", default=0),
-        help="Capture duration in seconds (0 = until stopped)",
+        help="Capture duration in seconds (0=unlimited)",
     )
-
     traffic_parser.add_argument(
         "-c",
         "--count",
         type=int,
         default=ConfigLoader.get("attacks", "traffic", "default_count", default=0),
-        help="Maximum number of packets to capture (0 = unlimited)",
+        help="Max packets to capture (0=unlimited)",
     )
-
     traffic_parser.add_argument(
         "-s",
         "--snaplen",
         type=int,
         default=ConfigLoader.get("attacks", "traffic", "default_snaplen", default=65535),
-        help="Snapshot length (bytes per packet)",
+        help="Snapshot length (bytes)",
     )
-
     traffic_parser.add_argument(
         "-p",
         "--promisc",
         action="store_true",
         default=ConfigLoader.get("attacks", "traffic", "default_promisc", default=True),
-        help="Enable promiscuous mode on capture interface",
+        help="Enable promiscuous mode",
     )
 
     # DEAUTH subcommand
     deauth_parser = subparsers.add_parser(
         "deauth",
-        help="Perform a deauth attack (requires a wireless interface in monitor mode)",
-        description=(
-            "Perform a Wi-Fi deauthentication attack. "
-            "NOTE: you must use this tool on a wireless interface that supports "
-            "monitor mode"
-        ),
+        help=f"{GREEN}Perform a deauth attack (requires wireless interface in monitor mode){RESET}",
+        formatter_class=ColorfulHelpFormatter,
+        description=get_deauth_banner(),
     )
 
     deauth_parser.add_argument(
         "-i",
         "--iface",
         default=ConfigLoader.get("attacks", "deauth", "default_interface", default="lo"),
-        help='a network interface with monitor mode enabled (i.e -> "wlan0")',
+        help=f"Network interface with monitor mode enabled ({BLUE}e.g. wlan0{RESET})",
         action="store",
         dest="net_iface",
         required=True,
@@ -258,7 +274,7 @@ def main() -> None:
     deauth_parser.add_argument(
         "-s",
         "--skip-monitormode",
-        help="skip automatic setup of monitor mode if it is already done",
+        help=f"Skip automatic monitor mode setup ({WARNING}use if already configured{RESET})",
         action="store_true",
         default=ConfigLoader.get("attacks", "deauth", "default_monitormode", default=False),
         dest="skip_monitormode",
@@ -268,7 +284,7 @@ def main() -> None:
     deauth_parser.add_argument(
         "-k",
         "--kill",
-        help="kill NetworkManager (might interfere with the process)",
+        help=f"{BRIGHT_RED}Kill NetworkManager service{RESET} (might cause connectivity issues)",
         action="store_true",
         default=ConfigLoader.get("attacks", "deauth", "default_kill", default=False),
         dest="kill_networkmanager",
@@ -277,7 +293,7 @@ def main() -> None:
     deauth_parser.add_argument(
         "-S",
         "--SSID",
-        help="custom SSID name (case-insensitive)",
+        help=f"Custom SSID name {BLUE}(case-insensitive){RESET}",
         action="store",
         default=ConfigLoader.get("attacks", "deauth", "default_ssid", default=None),
         dest="custom_ssid",
@@ -286,7 +302,7 @@ def main() -> None:
     deauth_parser.add_argument(
         "-b",
         "--BSSID",
-        help="custom BSSID address (case-insensitive)",
+        help=f"Custom BSSID address {BLUE}(case-insensitive){RESET}",
         action="store",
         default=ConfigLoader.get("attacks", "deauth", "default_bssid", default=None),
         dest="custom_bssid",
@@ -295,10 +311,8 @@ def main() -> None:
     deauth_parser.add_argument(
         "-c",
         "--clients",
-        help="MAC addresses of target clients to disconnect,"
-        " separated by a comma (i.e -> 00:1A:2B:3C:4D:5G,00:1a:2b:3c:4d:5e)",
+        help=f"Target client MAC addresses\n{BLUE}Example: 00:1A:2B:3C:4D:5E,00:1a:2b:3c:4d:5f{RESET}",
         action="store",
-        metavar="MAC",
         default=ConfigLoader.get("attacks", "deauth", "default_clients", default=None),
         type=lambda x: [validate_mac(m) for m in x.split(",")],
         dest="custom_client_macs",
@@ -307,18 +321,17 @@ def main() -> None:
     deauth_parser.add_argument(
         "-C",
         "--Channels",
-        help="custom channels to scan / de-auth, separated by a comma (i.e -> 1,3,4)",
+        help=f"Custom channels {BLUE}(e.g. 1 3 4){RESET}",
         action="store",
         nargs="+",
         default=ConfigLoader.get("attacks", "deauth", "default_channels", default=None),
         dest="custom_channels",
-        metavar="CH",
         required=False,
     )
     deauth_parser.add_argument(
         "-a",
         "--autostart",
-        help=("autostart the de-auth loop (if the scan result contains a single access point)"),
+        help=f"Autostart de-auth loop {BLUE}(when single AP detected){RESET}",
         action="store_true",
         default=ConfigLoader.get("attacks", "deauth", "default_autostart", default=False),
         dest="autostart",
@@ -327,7 +340,7 @@ def main() -> None:
     deauth_parser.add_argument(
         "-D",
         "--Debug",
-        help="enable debug prints",
+        help=f"{WARNING}Enable verbose debug output{RESET}",
         action="store_true",
         default=ConfigLoader.get("attacks", "deauth", "default_debug", default=False),
         dest="debug_mode",
@@ -336,7 +349,7 @@ def main() -> None:
     deauth_parser.add_argument(
         "-d",
         "--deauth-all-channels",
-        help="enable de-auther on all channels",
+        help=f"Enable de-auth on {BLUE}all available channels{RESET}",
         action="store_true",
         default=ConfigLoader.get("attacks", "deauth", "default_deauth_all", default=False),
         dest="deauth_all_channels",

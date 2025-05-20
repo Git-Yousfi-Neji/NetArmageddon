@@ -99,7 +99,6 @@ lint:
 	@echo "$(BLUE)→ Running linters…$(RESET)"
 	@flake8 netarmageddon tests
 	@mypy netarmageddon tests
-	@safety scan || echo "$(YELLOW)Safety scan skipped$(RESET)"
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
 c-lint: c-clean c-build
