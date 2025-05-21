@@ -78,7 +78,9 @@ class TrafficLogger(BaseAttack):
         ret = _traffic_lib.traffic_capture_start(ctypes.byref(cfg))
         if ret != 0:
             err = _traffic_lib.traffic_get_last_error()
-            self.logger.error(f"Capture failed: {err.decode() if err else 'unknown error'}")
+            self.logger.error(
+                f"Capture failed: {err.decode() if err else 'unknown error'}"
+            )
         else:
             self.logger.info("Capture finished")
         # ensure we mark stopped

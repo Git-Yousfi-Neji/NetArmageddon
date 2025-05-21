@@ -136,7 +136,9 @@ def main() -> None:
         "-O",
         "--request-options",
         type=parse_option_range,
-        default=ConfigLoader.get("attacks", "dhcp", "default_request_options", default="1,5,9"),
+        default=ConfigLoader.get(
+            "attacks", "dhcp", "default_request_options", default="1,5,9"
+        ),
         help=f'Comma-separated DHCP options ({BLUE}e.g. "1,3,6" or "1-10,15"{RESET})',
     )
     dhcp_parser.add_argument(
@@ -164,7 +166,9 @@ def main() -> None:
     arp_parser.add_argument(
         "-b",
         "--base-ip",
-        default=ConfigLoader.get("attacks", "arp", "default_base_ip", default="192.168.1."),
+        default=ConfigLoader.get(
+            "attacks", "arp", "default_base_ip", default="192.168.1."
+        ),
         help=f"Base IP address ({BLUE}e.g. 192.168.1.{RESET})",
     )
     arp_parser.add_argument(
@@ -177,7 +181,9 @@ def main() -> None:
     arp_parser.add_argument(
         "-m",
         "--mac-prefix",
-        default=ConfigLoader.get("attacks", "arp", "default_mac_prefix", default="de:ad:00"),
+        default=ConfigLoader.get(
+            "attacks", "arp", "default_mac_prefix", default="de:ad:00"
+        ),
         help=f"MAC address prefix ({BLUE}default: de:ad:00{RESET})",
     )
     arp_parser.add_argument(
@@ -206,13 +212,17 @@ def main() -> None:
         "-i",
         "--interface",
         required=True,
-        default=ConfigLoader.get("attacks", "traffic", "default_interface", default="lo"),
+        default=ConfigLoader.get(
+            "attacks", "traffic", "default_interface", default="lo"
+        ),
         help=f"Network interface ({BLUE}e.g. eth0{RESET})",
     )
     traffic_parser.add_argument(
         "-f",
         "--filter",
-        default=ConfigLoader.get("attacks", "traffic", "default_filter", default="tcp port 80"),
+        default=ConfigLoader.get(
+            "attacks", "traffic", "default_filter", default="tcp port 80"
+        ),
         help=f"BPF filter ({BLUE}e.g. 'tcp port 80'{RESET})",
     )
     traffic_parser.add_argument(
@@ -242,7 +252,9 @@ def main() -> None:
         "-s",
         "--snaplen",
         type=int,
-        default=ConfigLoader.get("attacks", "traffic", "default_snaplen", default=65535),
+        default=ConfigLoader.get(
+            "attacks", "traffic", "default_snaplen", default=65535
+        ),
         help="Snapshot length (bytes)",
     )
     traffic_parser.add_argument(
@@ -264,7 +276,9 @@ def main() -> None:
     deauth_parser.add_argument(
         "-i",
         "--iface",
-        default=ConfigLoader.get("attacks", "deauth", "default_interface", default="lo"),
+        default=ConfigLoader.get(
+            "attacks", "deauth", "default_interface", default="lo"
+        ),
         help=f"Network interface with monitor mode enabled ({BLUE}e.g. wlan0{RESET})",
         action="store",
         dest="net_iface",
@@ -276,7 +290,9 @@ def main() -> None:
         "--skip-monitormode",
         help=f"Skip automatic monitor mode setup ({WARNING}use if already configured{RESET})",
         action="store_true",
-        default=ConfigLoader.get("attacks", "deauth", "default_monitormode", default=False),
+        default=ConfigLoader.get(
+            "attacks", "deauth", "default_monitormode", default=False
+        ),
         dest="skip_monitormode",
         required=False,
     )
@@ -333,7 +349,9 @@ def main() -> None:
         "--autostart",
         help=f"Autostart de-auth loop {BLUE}(when single AP detected){RESET}",
         action="store_true",
-        default=ConfigLoader.get("attacks", "deauth", "default_autostart", default=False),
+        default=ConfigLoader.get(
+            "attacks", "deauth", "default_autostart", default=False
+        ),
         dest="autostart",
         required=False,
     )
@@ -351,7 +369,9 @@ def main() -> None:
         "--deauth-all-channels",
         help=f"Enable de-auth on {BLUE}all available channels{RESET}",
         action="store_true",
-        default=ConfigLoader.get("attacks", "deauth", "default_deauth_all", default=False),
+        default=ConfigLoader.get(
+            "attacks", "deauth", "default_deauth_all", default=False
+        ),
         dest="deauth_all_channels",
         required=False,
     )

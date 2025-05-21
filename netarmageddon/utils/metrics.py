@@ -24,5 +24,7 @@ class AttackMetrics:
         return {
             "duration": duration,
             "packets_per_sec": self.packets_sent / duration if duration > 0 else 0,
-            "error_rate": (self.errors / self.packets_sent if self.packets_sent > 0 else 0),
+            "error_rate": (
+                self.errors / self.packets_sent if self.packets_sent > 0 else 0
+            ),
         }

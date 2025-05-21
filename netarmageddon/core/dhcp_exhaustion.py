@@ -34,7 +34,9 @@ class DHCPExhaustion(BaseAttack):
             raise ValueError("Number of devices must be at least 1")
         self.num_devices = num_devices
         self.request_options = request_options or list(range(81))
-        self.client_src: List[str] = self._validate_macs(client_src) if client_src else []
+        self.client_src: List[str] = (
+            self._validate_macs(client_src) if client_src else []
+        )
         # Always create a deque, even if empty
         self.mac_pool: deque[str] = deque(self.client_src)
         self.sent_macs: set[str] = set()
@@ -137,6 +139,10 @@ class DHCPExhaustion(BaseAttack):
         """Stop attack thread"""
         self.running = False
         # only join if called from a different thread
-        if self.thread and self.thread.is_alive() and threading.current_thread() is not self.thread:
+        if (
+            self.thread
+            and self.thread.is_alive()
+            and threading.current_thread() is not self.thread
+        ):
             self.thread.join()
         self.logger.info("DHCP exhaustion stopped")

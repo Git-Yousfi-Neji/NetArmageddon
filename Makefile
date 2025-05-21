@@ -86,8 +86,8 @@ install:
 
 format:
 	@echo "$(BLUE)→ Running formatters…$(RESET)"
-	@isort .
-	@black .
+	@isort --settings-file config/formatter/.isort.cfg .
+	@black --config config/formatter/.black .
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
 c-format:
@@ -97,8 +97,8 @@ c-format:
 
 lint:
 	@echo "$(BLUE)→ Running linters…$(RESET)"
-	@flake8 netarmageddon tests
-	@mypy netarmageddon tests
+	@flake8 --config config/linter/.flake8 netarmageddon tests
+	@mypy --config-file config/linter/.mypy.ini netarmageddon tests
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
 c-lint: c-clean c-build
@@ -116,16 +116,6 @@ c-test: c-clean c-build
 	@sudo $(MAKE) -C $(C_SRC_DIR) test
 	@echo "$(GREEN)→→ DONE!$(RESET)"
 
-docs_build:
-	@echo "$(BLUE)→ Building docs…$(RESET)"
-	@mkdocs build
-	@echo "$(GREEN)→→ DONE!$(RESET)"
-
-docs_serve:
-	@echo "$(BLUE)→ Serving docs locally…$(RESET)"
-	@mkdocs serve
-	@echo "$(GREEN)→→ DONE!$(RESET)"
-
 help:
 	@echo "$(GREEN)Available targets:$(RESET)"
 	@echo "  $(YELLOW)all$(RESET):         Run c-clean, c-build, install, format, lint, test, docs_build"
@@ -139,6 +129,4 @@ help:
 	@echo "  $(YELLOW)c-lint$(RESET):        Same as lint but this is for C"
 	@echo "  $(YELLOW)test$(RESET):        Clean & run pytest"
 	@echo "  $(YELLOW)c-test$(RESET):        Clean & run C tests"
-	@echo "  $(YELLOW)docs_build$(RESET):  Build documentation"
-	@echo "  $(YELLOW)docs_serve$(RESET):  Serve docs locally"
 	@echo "  $(GREEN)help$(RESET):        Show this help message"

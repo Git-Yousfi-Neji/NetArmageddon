@@ -112,7 +112,6 @@ Explore comprehensive project documentation to understand implementation details
 - **[Usage Guide](docs/usage.md)** - Core functionality walkthrough with examples
 - **[Development Setup](docs/development.md)** - Environment configuration and contribution guidelines
 - **[Testing Strategy](docs/testing.md)** - Validation approach and quality assurance processes
-- **[API Reference](docs/api.md)** (WIP) - Module/class specifications and interfaces
 - **[Architecture Overview](docs/architecture.md)** (Planned) - System design and component relationships
 
 > **Note**: Documentation is actively being developed. Check back regularly for updates or [contribute](CONTRIBUTING.md) improvements!

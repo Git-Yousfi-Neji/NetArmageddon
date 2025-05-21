@@ -58,7 +58,9 @@ class ColorfulHelpFormatter(argparse.RawTextHelpFormatter):
 
     def _format_action(self, action):
         parts = super()._format_action(action)
-        return parts.replace("  -", f"{CYAN}  -{RESET}").replace("show this", f"{CYAN}show this")
+        return parts.replace("  -", f"{CYAN}  -{RESET}").replace(
+            "show this", f"{CYAN}show this"
+        )
 
     def start_section(self, heading):
         if heading:

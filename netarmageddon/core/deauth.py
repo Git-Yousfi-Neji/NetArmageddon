@@ -12,19 +12,6 @@ from threading import Thread
 from time import sleep
 from typing import Dict, Generator, List, Union
 
-from scapy.all import RandMAC, sendp, sniff
-from scapy.layers.dot11 import (
-    Dot11,
-    Dot11AssoResp,
-    Dot11Beacon,
-    Dot11Deauth,
-    Dot11Elt,
-    Dot11ProbeResp,
-    Dot11QoS,
-    Dot11ReassoResp,
-    RadioTap,
-)
-
 from netarmageddon.utils.misc_helpers import get_time
 from netarmageddon.utils.net_definitions import (
     BD_MACADDR,
@@ -46,6 +33,18 @@ from netarmageddon.utils.output_manager import (
     print_info,
     print_input,
     printf,
+)
+from scapy.all import RandMAC, sendp, sniff
+from scapy.layers.dot11 import (
+    Dot11,
+    Dot11AssoResp,
+    Dot11Beacon,
+    Dot11Deauth,
+    Dot11Elt,
+    Dot11ProbeResp,
+    Dot11QoS,
+    Dot11ReassoResp,
+    RadioTap,
 )
 
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)  # suppress warnings
@@ -99,19 +98,33 @@ class Interceptor:
             if not self._kill_networkmanager():
                 print_error("Failed to kill NetworkManager...")
 
-        self._channel_range = {channel: defaultdict(dict) for channel in self._get_channels()}
+        self._channel_range = {
+            channel: defaultdict(dict) for channel in self._get_channels()
+        }
         self.log_debug(f"Supported channels: {[c for c in self._channel_range.keys()]}")
-        self._all_ssids: Dict[BandType, Dict[str, SSID]] = {band: dict() for band in BandType}
-        self._custom_ssid_name: Union[str, None] = self.parse_custom_ssid_name(ssid_name)
-        self.log_debug(f"Selected custom ssid name: {self._custom_ssid_name}")
-        self._custom_bssid_addr: Union[str, None] = self.parse_custom_bssid_addr(bssid_addr)
-        self.log_debug(f"Selected custom bssid addr: {self._custom_ssid_name}")
-        self._custom_target_client_mac: Union[List[str], None] = self.parse_custom_client_mac(
-            custom_client_macs
+        self._all_ssids: Dict[BandType, Dict[str, SSID]] = {
+            band: dict() for band in BandType
+        }
+        self._custom_ssid_name: Union[str, None] = self.parse_custom_ssid_name(
+            ssid_name
         )
-        self.log_debug(f"Selected target client mac addrs: {self._custom_target_client_mac}")
-        self._custom_target_ap_channels: List[int] = self.parse_custom_channels(custom_channels)
-        self.log_debug(f"Selected target client channels: {self._custom_target_ap_channels}")
+        self.log_debug(f"Selected custom ssid name: {self._custom_ssid_name}")
+        self._custom_bssid_addr: Union[str, None] = self.parse_custom_bssid_addr(
+            bssid_addr
+        )
+        self.log_debug(f"Selected custom bssid addr: {self._custom_ssid_name}")
+        self._custom_target_client_mac: Union[
+            List[str], None
+        ] = self.parse_custom_client_mac(custom_client_macs)
+        self.log_debug(
+            f"Selected target client mac addrs: {self._custom_target_client_mac}"
+        )
+        self._custom_target_ap_channels: List[int] = self.parse_custom_channels(
+            custom_channels
+        )
+        self.log_debug(
+            f"Selected target client channels: {self._custom_target_ap_channels}"
+        )
 
         self._custom_target_ap_last_ch = 0  # to avoid overlapping
         self._midrun_output_buffer: List[str] = list()
@@ -122,7 +135,9 @@ class Interceptor:
         self._ch_iterator: Union[Generator[int, None, int], None] = None
         if self._deauth_all_channels:
             self._ch_iterator = self._init_channels_generator()
-        print_info(f"De-auth all channels enabled -> {BOLD}{self._deauth_all_channels}{RESET}")
+        print_info(
+            f"De-auth all channels enabled -> {BOLD}{self._deauth_all_channels}{RESET}"
+        )
 
         self._autostart = autostart
 
@@ -251,7 +266,9 @@ class Interceptor:
         try:
             if pkt.haslayer(Dot11Beacon) or pkt.haslayer(Dot11ProbeResp):
                 ap_mac = str(pkt.addr3)
-                ssid = pkt[Dot11Elt].info.strip(b"\x00").decode("utf-8").strip() or ap_mac
+                ssid = (
+                    pkt[Dot11Elt].info.strip(b"\x00").decode("utf-8").strip() or ap_mac
+                )
                 if (
                     ap_mac == BD_MACADDR
                     or not ssid
@@ -271,10 +288,14 @@ class Interceptor:
                 if ssid not in self._all_ssids[band_type]:
                     self._all_ssids[band_type][ssid] = SSID(ssid, ap_mac, band_type)
                 self._all_ssids[band_type][ssid].add_channel(
-                    pkt_ch if pkt_ch in self._channel_range else self._current_channel_num
+                    pkt_ch
+                    if pkt_ch in self._channel_range
+                    else self._current_channel_num
                 )
                 if self._custom_ssid_name_is_set():
-                    self._custom_target_ap_last_ch = self._all_ssids[band_type][ssid].channel
+                    self._custom_target_ap_last_ch = self._all_ssids[band_type][
+                        ssid
+                    ].channel
             else:
                 self._clients_sniff_cb(pkt)  # pass forward to find potential clients
         except Exception as exc:
@@ -283,9 +304,13 @@ class Interceptor:
 
     def _scan_channels_for_aps(self):
         channels_to_scan = self._get_channel_range()
-        print_info(f"Starting AP scan, please wait... ({len(channels_to_scan)} channels total)")
+        print_info(
+            f"Starting AP scan, please wait... ({len(channels_to_scan)} channels total)"
+        )
         if self._custom_ssid_name_is_set():
-            print_info(f"Scanning for target SSID -> {BOLD}{self._custom_ssid_name}{RESET}")
+            print_info(
+                f"Scanning for target SSID -> {BOLD}{self._custom_ssid_name}{RESET}"
+            )
         try:
             for idx, ch_num in enumerate(channels_to_scan):
                 if (
@@ -327,7 +352,9 @@ class Interceptor:
         self._scan_channels_for_aps()
         for band_ssids in self._all_ssids.values():
             for ssid_name, ssid_obj in band_ssids.items():
-                self._channel_range[ssid_obj.channel][ssid_name] = copy.deepcopy(ssid_obj)
+                self._channel_range[ssid_obj.channel][ssid_name] = copy.deepcopy(
+                    ssid_obj
+                )
 
         pref = "[   ] "
         printf(
@@ -453,9 +480,13 @@ class Interceptor:
                     failed_attempts_ctr += 1
                     if failed_attempts_ctr >= self._max_consecutive_failed_send_lim:
                         raise exc
-                    sleep(Interceptor._DEAUTH_INTV)  # if exception - sleep to throttle down
+                    sleep(
+                        Interceptor._DEAUTH_INTV
+                    )  # if exception - sleep to throttle down
         except Exception as exc:
-            Interceptor.abort_run(f"Exception '{exc}' in deauth-loop -> {traceback.format_exc()}")
+            Interceptor.abort_run(
+                f"Exception '{exc}' in deauth-loop -> {traceback.format_exc()}"
+            )
 
     def _send_deauth_client(self, ap_mac: str, client_mac: str):
         sendp(
@@ -489,7 +520,11 @@ class Interceptor:
         printf(f"{DELIM}\n")
 
         threads = list()
-        for action in [self._run_deauther, self._listen_for_clients, self.report_status]:
+        for action in [
+            self._run_deauther,
+            self._listen_for_clients,
+            self.report_status,
+        ]:
             t = Thread(target=action, args=tuple())
             t.start()
             threads.append(t)
@@ -510,7 +545,9 @@ class Interceptor:
             print_info(
                 f"Target clients{BOLD}{str(len(self._get_target_clients())).rjust(80 - 18, ' ')}{RESET}"
             )
-            print_info(f"Elapsed sec {BOLD}{str(get_time() - start).rjust(80 - 16, ' ')}{RESET}")
+            print_info(
+                f"Elapsed sec {BOLD}{str(get_time() - start).rjust(80 - 16, ' ')}{RESET}"
+            )
             sleep(Interceptor._PRINT_STATS_INTV)
             if Interceptor._ABORT:  # might change while sleeping
                 break

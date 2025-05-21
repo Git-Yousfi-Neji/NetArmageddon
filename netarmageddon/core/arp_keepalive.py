@@ -59,7 +59,9 @@ class ARPKeepAlive(BaseAttack):
         """Create ARP announcement packet"""
         ip = f"{self.base_ip}{ip_suffix}"
         mac = self._generate_mac(ip_suffix)
-        return Ether(src=mac, dst="ff:ff:ff:ff:ff:ff") / ARP(op=1, hwsrc=mac, psrc=ip, pdst=ip)
+        return Ether(src=mac, dst="ff:ff:ff:ff:ff:ff") / ARP(
+            op=1, hwsrc=mac, psrc=ip, pdst=ip
+        )
 
     def _send_arp_announcements(self) -> None:
         """
@@ -88,7 +90,9 @@ class ARPKeepAlive(BaseAttack):
                 time.sleep(delay)
 
             sleep_status = (
-                "no more cycles" if cycle == self.cycles else f"sleeping {self.interval}s"
+                "no more cycles"
+                if cycle == self.cycles
+                else f"sleeping {self.interval}s"
             )
             self.logger.info(
                 f"--- Completed ARP cycle {cycle}/{self.cycles}: "
@@ -115,6 +119,10 @@ class ARPKeepAlive(BaseAttack):
     def stop(self) -> None:
         """Stop ARP maintenance safely (no self-join)."""
         self.running = False
-        if self.thread and self.thread.is_alive() and threading.current_thread() is not self.thread:
+        if (
+            self.thread
+            and self.thread.is_alive()
+            and threading.current_thread() is not self.thread
+        ):
             self.thread.join()
         self.logger.info("ARP keep-alive stopped")

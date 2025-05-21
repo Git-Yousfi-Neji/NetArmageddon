@@ -2,7 +2,6 @@ import threading
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from netarmageddon.core.traffic import TrafficLogger
 
 
@@ -93,7 +92,9 @@ def test_duration_handling(traffic_logger):
     ):
         # 1) Block the capture thread so running=True persists
         done = threading.Event()
-        mock_lib.traffic_capture_start.side_effect = lambda cfg: done.wait(timeout=5) or 0
+        mock_lib.traffic_capture_start.side_effect = (
+            lambda cfg: done.wait(timeout=5) or 0
+        )
 
         traffic_logger.duration = 1
         traffic_logger.start()

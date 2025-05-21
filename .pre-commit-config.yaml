@@ -11,21 +11,25 @@ repos:
     rev: 23.12.1
     hooks:
       - id: black
+        args: [--config=config/formatter/.black]
 
   - repo: https://github.com/PyCQA/isort
     rev: 5.13.2
     hooks:
       - id: isort
+        args: [--settings-file=config/formatter/.isort.cfg]
 
   - repo: https://github.com/PyCQA/flake8
     rev: 6.1.0
     hooks:
       - id: flake8
+        args: [--config=config/linter/.flake8]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.7.1
     hooks:
       - id: mypy
+        args: [--config=config/linter/.mypy.ini]
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v14.0.0

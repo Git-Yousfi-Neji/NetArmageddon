@@ -2,9 +2,8 @@ import time
 from unittest.mock import MagicMock, patch
 
 import pytest
-from scapy.layers.l2 import ARP, Ether
-
 from netarmageddon.core.arp_keepalive import ARPKeepAlive
+from scapy.layers.l2 import ARP, Ether
 
 
 def test_arp_initialization() -> None:

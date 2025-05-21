@@ -3,7 +3,9 @@ import ctypes
 import os
 from venv import logger
 
-_lib = ctypes.CDLL(os.path.join(os.path.dirname(__file__), "traffic_c", "libtraffic.so"))
+_lib = ctypes.CDLL(
+    os.path.join(os.path.dirname(__file__), "traffic_c", "libtraffic.so")
+)
 
 
 class TrafficCaptureConfig(ctypes.Structure):
