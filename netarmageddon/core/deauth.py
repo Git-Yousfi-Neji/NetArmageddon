@@ -13,12 +13,7 @@ from time import sleep
 from typing import Dict, Generator, List, Union
 
 from netarmageddon.utils.misc_helpers import get_time
-from netarmageddon.utils.net_definitions import (
-    BD_MACADDR,
-    SSID,
-    BandType,
-    frequency_to_channel,
-)
+from netarmageddon.utils.net_definitions import BD_MACADDR, SSID, BandType, frequency_to_channel
 from netarmageddon.utils.output_manager import (
     BOLD,
     DELIM,
@@ -490,11 +485,7 @@ class Interceptor:
         printf(f"{DELIM}\n")
 
         threads = list()
-        for action in [
-            self._run_deauther,
-            self._listen_for_clients,
-            self.report_status,
-        ]:
+        for action in [self._run_deauther, self._listen_for_clients, self.report_status]:
             t = Thread(target=action, args=tuple())
             t.start()
             threads.append(t)

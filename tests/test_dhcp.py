@@ -28,11 +28,7 @@ def test_mac_validation() -> None:
     # Valid MACs
     valid_macs = ["00:11:22:33:44:55", "aa-bb-cc-dd-ee-ff", "FF:EE:DD:CC:BB:AA"]
     attack = DHCPExhaustion("lo", client_src=valid_macs)
-    assert attack.client_src == [
-        "00:11:22:33:44:55",
-        "aa:bb:cc:dd:ee:ff",
-        "ff:ee:dd:cc:bb:aa",
-    ]
+    assert attack.client_src == ["00:11:22:33:44:55", "aa:bb:cc:dd:ee:ff", "ff:ee:dd:cc:bb:aa"]
 
     # Invalid MAC
     with pytest.raises(ValueError):

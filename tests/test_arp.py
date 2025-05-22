@@ -94,11 +94,7 @@ def test_arp_cycles_count_and_exit(monkeypatch: pytest.MonkeyPatch) -> None:
 
     # Create with 2 devices, 3 cycles, tiny interval
     arp = ARPKeepAlive(
-        interface="lo",
-        base_ip="192.168.0.",
-        num_devices=NUM_DEVICES,
-        interval=0.01,
-        cycles=CYCLES,
+        interface="lo", base_ip="192.168.0.", num_devices=NUM_DEVICES, interval=0.01, cycles=CYCLES
     )
 
     arp.start()

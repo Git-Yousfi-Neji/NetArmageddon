@@ -37,8 +37,7 @@ def check_root_privileges() -> None:
 def configure_logging() -> None:
     """Set up logging configuration"""
     logging.basicConfig(
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
     )
 
 

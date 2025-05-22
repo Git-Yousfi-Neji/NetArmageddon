@@ -86,9 +86,7 @@ def test_channel_parsing(parser):
 
 def test_help_command():
     result = subprocess.run(
-        [sys.executable, "-m", "netarmageddon", "deauth", "--help"],
-        capture_output=True,
-        text=True,
+        [sys.executable, "-m", "netarmageddon", "deauth", "--help"], capture_output=True, text=True
     )
     assert result.returncode == 1
     assert "This script requires root privileges" in result.stdout
