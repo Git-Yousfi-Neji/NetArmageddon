@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from netarmageddon.config.config_loader import ConfigLoader
+from netarmageddon.utils.config_loader import ConfigLoader
 
 
 def test_config_loading() -> None:
@@ -19,7 +19,7 @@ def test_missing_config(monkeypatch) -> None:
     def fake_path(*args, **kwargs):
         return Path("nonexistent.yaml")
 
-    monkeypatch.setattr("netarmageddon.config.config_loader.Path", fake_path)
+    monkeypatch.setattr("netarmageddon.utils.config_loader.Path", fake_path)
     ConfigLoader._config = None
     try:
         ConfigLoader._load_config()

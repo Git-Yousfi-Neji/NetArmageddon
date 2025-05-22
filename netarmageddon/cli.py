@@ -5,7 +5,7 @@ import sys
 import time
 from typing import List
 
-from netarmageddon.config.config_loader import ConfigLoader
+from netarmageddon.utils.config_loader import ConfigLoader
 from netarmageddon.core.traffic import TrafficLogger
 
 from .core import ARPKeepAlive, DHCPExhaustion, Interceptor

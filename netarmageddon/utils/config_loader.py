@@ -1,9 +1,9 @@
-# netarmageddon/config/config_loader.py
-
 from pathlib import Path
 from typing import Any, Optional, cast
 
 import yaml
+
+DEFAULT_VALUES_F_NAME = "default.yaml"
 
 
 class ConfigLoader:
@@ -12,7 +12,7 @@ class ConfigLoader:
     @classmethod
     def _load_config(cls) -> dict[str, Any]:
         if cls._config is None:
-            cfg_path = Path(__file__).parent / "default.yaml"
+            cfg_path = Path(__file__).parent / f"{DEFAULT_VALUES_F_NAME}"
             with cfg_path.open() as f:
                 cls._config = yaml.safe_load(f)
         return cast(dict[str, Any], cls._config)
