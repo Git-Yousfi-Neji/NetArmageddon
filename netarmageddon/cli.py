@@ -27,9 +27,13 @@ from .utils.output_manager import (
     ColorfulHelpFormatter,
 )
 
+# Allow help without root privileges
+if any(arg in sys.argv for arg in ("-h", "--help")):
+    os.environ["ALLOW_HELP_WITHOUT_ROOT"] = "1"
+
 
 def check_root_privileges() -> None:
-    if os.geteuid() != 0:
+    if not os.getenv("ALLOW_HELP_WITHOUT_ROOT") and os.geteuid() != 0:
         print(f"{BRIGHT_RED}This script requires root privileges!{RESET}")
         sys.exit(1)
 
@@ -102,6 +106,7 @@ def main() -> None:
         description=get_general_banner(),
         epilog=f"{BRIGHT_RED}{BRIGHT_YELLOW}[WARNING] Use only on networks you own and control!{RESET}",
         formatter_class=ColorfulHelpFormatter,
+        prog="netarmageddon",
     )
 
     subparsers = parser.add_subparsers(dest="command", required=True, title="Supported Features")

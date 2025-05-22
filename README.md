@@ -56,57 +56,142 @@ cd NetArmageddon
 make
 ```
 
-## Usage 🚀
+## NetArmageddon - Network Stress Testing Framework 🚀
+<!-- USAGE:main:start -->
+```console
+  Usage: netarmageddon [-h] {dhcp,arp,traffic,deauth} ...
 
-#### DHCP Exhaustion (50 devices)
-```
-sudo python -m netarmageddon dhcp -i eth0 -n 50
-```
+      ▄▄▄       ██▀███   ███▄ ▄███▓ ▄▄▄        ▄████ ▓█████ ▓█████▄ ▓█████▄  ▒█████   ███▄    █
+      ▒████▄    ▓██ ▒ ██▒▓██▒▀█▀ ██▒▒████▄     ██▒ ▀█▒▓█   ▀ ▒██▀ ██▌▒██▀ ██▌▒██▒  ██▒ ██ ▀█   █
+      ▒██  ▀█▄  ▓██ ░▄█ ▒▓██    ▓██░▒██  ▀█▄  ▒██░▄▄▄░▒███   ░██   █▌░██   █▌▒██░  ██▒▓██  ▀█ ██▒
+      ░██▄▄▄▄██ ▒██▀▀█▄  ▒██    ▒██ ░██▄▄▄▄██ ░▓█  ██▓▒▓█  ▄ ░▓█▄   ▌░▓█▄   ▌▒██   ██░▓██▒  ▐▌██▒
+      ▓█   ▓██▒░██▓ ▒██▒▒██▒   ░██▒ ▓█   ▓██▒░▒▓███▀▒░▒████▒░▒████▓ ░▒████▓ ░ ████▓▒░▒██░   ▓██░
+      ▒▒   ▓▒█░░ ▒▓ ░▒▓░░ ▒░   ░  ░ ▒▒   ▓▒█░ ░▒   ▒ ░░ ▒░ ░ ▒▒▓  ▒  ▒▒▓  ▒ ░ ▒░▒░▒░ ░ ▒░   ▒ ▒
+      ▒   ▒▒ ░  ░▒ ░ ▒░░  ░      ░  ▒   ▒▒ ░  ░   ░  ░ ░  ░ ░ ▒  ▒  ░ ▒  ▒   ░ ▒ ▒░ ░ ░░   ░ ▒░
+      ░   ▒     ░░   ░ ░      ░     ░   ▒   ░ ░   ░    ░    ░ ░  ░  ░ ░  ░ ░ ░ ░ ▒     ░   ░ ░
+          ░  ░   ░            ░         ░  ░      ░    ░  ░   ░       ░        ░ ░           ░
+                          Network Stress Testing Framework
+                Use with caution and only on authorized networks!
 
-#### ARP Keep-Alive (192.168.1.x network)
-```
-sudo python -m netarmageddon arp -i eth0 -b 192.168.1.
-```
+  options:
+    -h, --help                          show this help message and exit
 
-#### Combined attack (Ctrl+C to stop)
-```
-sudo python -m netarmageddon dhcp -i eth0 -n 100 & \
-sudo python -m netarmageddon arp -i eth0 -b 192.168.1.
-```
+  Supported Features:
+    {dhcp,arp,traffic,deauth}
+      dhcp                     DHCP exhaustion attack
+      arp                      Maintain devices in ARP tables
+      traffic                  Capture live packets to a PCAP file
+      deauth                   Perform a deauth attack (requires wireless interface in monitor mode)
 
-#### Limited device count with custom MACs
+  [WARNING] Use only on networks you own and control!
 ```
-sudo python -m netarmageddon dhcp -i eth0 -n 10 -s de:ad:be:ef:13:37,ca:fe:ba:be:00:11
-```
+<!-- USAGE:main:end -->
 
-#### Specific DHCP options request
-```
-sudo python -m netarmageddon dhcp -i eth0 -O 1,3,6,15 -n 5
-```
+### Features:
+### DHCP Exhaustion:
+<!-- USAGE:dhcp:start -->
+```console
+  Usage: netarmageddon dhcp [-h] -i INTERFACE [-n NUM_DEVICES] [-O REQUEST_OPTIONS] [-s CLIENT_SRC]
 
-#### Traffic Capture (HTTP traffic, 60 seconds)
+       ██████╗ ██╗  ██╗ ██████╗██████╗
+       ██╔══██╗██║  ██║██╔════╝██╔══██╗
+       ██║  ██║███████║██║     ██████╔╝
+       ██║  ██║██╔══██║██║     ██╔═══╝
+       ██████╔╝██║  ██║╚██████╗██║
+       ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝
+       Flooding network with malicious DHCP requests
+
+  options:
+    -h, --help                               show this help message and exit
+    -i, --interface INTERFACE                Network interface to use (e.g. eth0)
+    -n, --num-devices NUM_DEVICES            Number of fake devices to simulate
+    -O, --request-options REQUEST_OPTIONS    Comma-separated DHCP options (e.g. "1,3,6" or "1-10,15")
+    -s, --client-src CLIENT_SRC              Comma-separated list of MAC addresses to cycle through
 ```
-sudo python -m netarmageddon traffic -i eth0 -f "tcp port 80" -o web.pcap -d 60
+<!-- USAGE:dhcp:end -->
+
+### ARP Keep-Alive:
+<!-- USAGE:arp:start -->
+```console
+  Usage: netarmageddon arp [-h] -i INTERFACE [-b BASE_IP] [-n NUM_DEVICES] [-m MAC_PREFIX] [-t INTERVAL] [-c CYCLES]
+
+        █████╗ ██████╗ ██████╗
+       ██╔══██╗██╔══██╗██╔══██╗
+       ███████║██████╔╝██████╔╝
+       ██╔══██║██╔══██╗██╔═══╝
+       ██║  ██║██║  ██║██║
+       ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝
+       Maintaining phantom devices in network tables
+
+  options:
+    -h, --help                           show this help message and exit
+    -i, --interface INTERFACE            Network interface (e.g. eth0)
+    -b, --base-ip BASE_IP                Base IP address (e.g. 192.168.1.)
+    -n, --num-devices NUM_DEVICES        Number of devices to maintain
+    -m, --mac-prefix MAC_PREFIX          MAC address prefix (default: de:ad:00)
+    -t, --interval INTERVAL              Seconds between ARP bursts
+    -c, --cycles CYCLES                  Number of announcement cycles
 ```
-#### Continuous Packet Capture
+<!-- USAGE:arp:end -->
+
+### Traffic Logger:
+<!-- USAGE:traffic:start -->
+```console
+  Usage: netarmageddon traffic [-h] -i INTERFACE [-f FILTER] -o OUTPUT [-d DURATION] [-c COUNT] [-s SNAPLEN] [-p]
+
+     ████████╗██████╗  █████╗ ███████╗███████╗██╗ ██████╗
+     ╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██╔════╝██║██╔════╝
+        ██║   ██████╔╝███████║█████╗  █████╗  ██║██║
+        ██║   ██╔══██╗██╔══██║██╔══╝  ██╔══╝  ██║██║
+        ██║   ██║  ██║██║  ██║██║     ██║     ██║╚██████╗
+        ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝ ╚═════╝
+      Capturing all passing network packets
+
+  options:
+    -h, --help                         show this help message and exit
+    -i, --interface INTERFACE          Network interface (e.g. eth0)
+    -f, --filter FILTER                BPF filter (e.g. 'tcp port 80')
+    -o, --output OUTPUT                Output PCAP filename
+    -d, --duration DURATION            Capture duration in seconds (0=unlimited)
+    -c, --count COUNT                  Max packets to capture (0=unlimited)
+    -s, --snaplen SNAPLEN              Snapshot length (bytes)
+    -p, --promisc                      Enable promiscuous mode
 ```
-sudo python -m netarmageddon traffic -i wlan0 -o full_capture.pcap -d 0
+<!-- USAGE:traffic:end -->
+
+### Deauthentication Attack:
+<!-- USAGE:deauth:start -->
+```console
+  Usage: netarmageddon deauth [-h] -i NET_IFACE [-s] [-k] [-S CUSTOM_SSID] [-b CUSTOM_BSSID] [-c CUSTOM_CLIENT_MACS] [-C CUSTOM_CHANNELS [CUSTOM_CHANNELS ...]] [-a] [-D] [-d]
+
+       ██████╗ ███████╗ █████╗ ██╗   ██╗████████╗██╗  ██╗
+       ██╔══██╗██╔════╝██╔══██╗██║   ██║╚══██╔══╝██║  ██║
+       ██║  ██║█████╗  ███████║██║   ██║   ██║   ███████║
+       ██║  ██║██╔══╝  ██╔══██║██║   ██║   ██║   ██╔══██║
+       ██████╔╝███████╗██║  ██║╚██████╔╝   ██║   ██║  ██║
+       ╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝
+       Disrupting wireless client connections
+       Perform a Wi-Fi deauthentication attack.
+       NOTE: you must use this tool on a wireless interface that supports
+             monitor mode
+
+  options:
+    -h, --help                                   show this help message and exit
+    -i, --iface NET_IFACE                        Network interface with monitor mode enabled (e.g. wlan0)
+    -s, --skip-monitormode                       Skip automatic monitor mode setup (use if already configured)
+    -k, --kill                                   Kill NetworkManager service (might cause connectivity issues)
+    -S, --SSID CUSTOM_SSID                       Custom SSID name (case-insensitive)
+    -b, --BSSID CUSTOM_BSSID                     Custom BSSID address (case-insensitive)
+    -c, --clients CUSTOM_CLIENT_MACS             Target client MAC addresses
+                                                 Example: 00:1A:2B:3C:4D:5E,00:1a:2b:3c:4d:5f
+    -C, --Channels CUSTOM_CHANNELS [CUSTOM_CHANNELS ...]
+                                                 Custom channels (e.g. 1 3 4)
+    -a, --autostart                              Autostart de-auth loop (when single AP detected)
+    -D, --Debug                                  Enable verbose debug output
+    -d, --deauth-all-channels                    Enable de-auth on all available channels
 ```
-#### Deauthentication Attack
-###### Target specific client MAC
-```
-sudo python -m netarmageddon deauth \
-    -i wlan0 \
-    --clients AA:BB:CC:DD:EE:FF
-```
-###### Deauth all clients across all channels, skip monitor-mode check, and kill NetManager service
-```
-sudo python -m netarmageddon deauth \
-    -i wlan0 \
-    --deauth-all-channels \
-    --skip-monitormode \
-    --kill
-```
+<!-- USAGE:deauth:end -->
+
 ## Documentation 📚
 
 Explore comprehensive project documentation to understand implementation details and usage:

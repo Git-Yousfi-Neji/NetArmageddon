@@ -61,6 +61,10 @@ compile_commands:
 	@mv $(COMPILE_COMMANDS) $(C_SRC_DIR)/$(COMPILE_COMMANDS)
 	@echo "$(GREEN)🟢 DONE!$(RESET)"
 
+generate_help:
+	@python docs/generate_help.py
+	@echo "$(GREEN)🟢 Documentation updated in README.md $(RESET)"
+
 c-build: compile_commands
 	@echo "$(GREEN)→ Building C traffic logger…$(RESET)"
 	@$(MAKE) -C $(C_SRC_DIR)
