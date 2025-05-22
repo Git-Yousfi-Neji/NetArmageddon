@@ -103,7 +103,7 @@ def test_arp_cycles_count_and_exit(monkeypatch: pytest.MonkeyPatch) -> None:
     arp.thread.join(timeout=1)
 
     # Should have sent exactly 6 ARP packets
-    assert len(sent) == NUM_DEVICES * CYCLES, f"Expected {2*3} packets, got {len(sent)}"
+    assert len(sent) == NUM_DEVICES * CYCLES, f"Expected {2 * 3} packets, got {len(sent)}"
 
     # The thread must be done and running=False
     assert not arp.running

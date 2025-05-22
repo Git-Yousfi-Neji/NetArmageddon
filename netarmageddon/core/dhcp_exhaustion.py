@@ -48,7 +48,7 @@ class DHCPExhaustion(BaseAttack):
         for idx, mac in enumerate(mac_list):
             if not re.match(pattern, mac):
                 raise ValueError(
-                    f"Invalid MAC #{idx+1}: '{mac}'\n"
+                    f"Invalid MAC #{idx + 1}: '{mac}'\n"
                     "Valid format: '01:23:45:67:89:ab' or '01-23-45-67-89-ab'"
                 )
             # Normalize to lowercase with colons
@@ -112,7 +112,7 @@ class DHCPExhaustion(BaseAttack):
                 sendp(pkt, iface=self.interface, verbose=False)
                 self.logger.info(
                     f"Sent DHCP request from {pkt.src}\
-                        ({sent_count+1}/{self.num_devices})"
+                        ({sent_count+1} / {self.num_devices})"
                 )
                 sent_count += 1
                 time.sleep(delay)
