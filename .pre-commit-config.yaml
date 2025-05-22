@@ -22,7 +22,6 @@ repos:
     hooks:
       - id: isort
         args: [
-          --check,
           --settings-path=config/formatter/.isort.cfg
           ]
 

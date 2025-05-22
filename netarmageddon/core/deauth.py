@@ -13,7 +13,12 @@ from time import sleep
 from typing import Dict, Generator, List, Union
 
 from netarmageddon.utils.misc_helpers import get_time
-from netarmageddon.utils.net_definitions import BD_MACADDR, SSID, BandType, frequency_to_channel
+from netarmageddon.utils.net_definitions import (
+    BD_MACADDR,
+    SSID,
+    BandType,
+    frequency_to_channel,
+)
 from netarmageddon.utils.output_manager import (
     BOLD,
     DELIM,
