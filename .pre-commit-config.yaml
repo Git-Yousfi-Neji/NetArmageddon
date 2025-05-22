@@ -3,6 +3,7 @@ repos:
     rev: v4.5.0
     hooks:
       - id: trailing-whitespace
+        exclude: ^README.md$
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
@@ -65,3 +66,12 @@ repos:
         ]
         language: system
         files: netarmageddon/core/traffic_c/.*\.(c|h)$
+
+  - repo: local
+    hooks:
+      - id: update-README
+        name: Update help in README
+        entry: make generate_help
+        language: system
+        files: ^netarmageddon/
+        stages: [pre-commit]

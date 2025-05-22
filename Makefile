@@ -11,9 +11,9 @@ RESET  := \033[0m
 C_SRC_DIR = netarmageddon/core/traffic_c
 COMPILE_COMMANDS = compile_commands.json
 
-.PHONY: all c-clean c-build install format lint test docs_build docs_serve c-test help
+.PHONY: all c-clean c-build install format lint test docs_serve c-test help
 
-all: clean c-clean install format c-format lint c-lint c-build test c-test docs_build
+all: clean c-clean install format c-format lint c-lint c-build test c-test generate_help
 
 clean:
 	@echo "$(YELLOW)→ Fixing ownership…$(RESET)"
@@ -61,6 +61,7 @@ compile_commands:
 	@mv $(COMPILE_COMMANDS) $(C_SRC_DIR)/$(COMPILE_COMMANDS)
 	@echo "$(GREEN)🟢 DONE!$(RESET)"
 
+# Generate helper in README
 generate_help:
 	@python docs/generate_help.py
 	@echo "$(GREEN)🟢 Documentation updated in README.md $(RESET)"
@@ -119,7 +120,7 @@ c-test: c-clean c-build
 
 help:
 	@echo "$(GREEN)Available targets:$(RESET)"
-	@echo "  $(YELLOW)all$(RESET):         Run c-clean, c-build, install, format, lint, test, docs_build"
+	@echo "  $(YELLOW)all$(RESET):         Run c-clean, c-build, install, format, lint, test generate_help"
 	@echo "  $(RED)clean$(RESET):    Clean everything"
 	@echo "  $(RED)c-clean$(RESET):     Clean C build artifacts"
 	@echo "  $(YELLOW)c-build$(RESET):   Build C traffic-logger"

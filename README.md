@@ -57,10 +57,10 @@ make
 ```
 
 ## NetArmageddon - Network Stress Testing Framework 🚀
-<!-- USAGE:main:start -->
+<!-- USAGE:netarmageddon:start -->
 ```console
-  Usage: netarmageddon [-h] {dhcp,arp,traffic,deauth} ...
-
+  Usage: sudo python -m netarmageddon [-h] {dhcp,arp,traffic,deauth} ...
+  
       ▄▄▄       ██▀███   ███▄ ▄███▓ ▄▄▄        ▄████ ▓█████ ▓█████▄ ▓█████▄  ▒█████   ███▄    █
       ▒████▄    ▓██ ▒ ██▒▓██▒▀█▀ ██▒▒████▄     ██▒ ▀█▒▓█   ▀ ▒██▀ ██▌▒██▀ ██▌▒██▒  ██▒ ██ ▀█   █
       ▒██  ▀█▄  ▓██ ░▄█ ▒▓██    ▓██░▒██  ▀█▄  ▒██░▄▄▄░▒███   ░██   █▌░██   █▌▒██░  ██▒▓██  ▀█ ██▒
@@ -69,30 +69,30 @@ make
       ▒▒   ▓▒█░░ ▒▓ ░▒▓░░ ▒░   ░  ░ ▒▒   ▓▒█░ ░▒   ▒ ░░ ▒░ ░ ▒▒▓  ▒  ▒▒▓  ▒ ░ ▒░▒░▒░ ░ ▒░   ▒ ▒
       ▒   ▒▒ ░  ░▒ ░ ▒░░  ░      ░  ▒   ▒▒ ░  ░   ░  ░ ░  ░ ░ ▒  ▒  ░ ▒  ▒   ░ ▒ ▒░ ░ ░░   ░ ▒░
       ░   ▒     ░░   ░ ░      ░     ░   ▒   ░ ░   ░    ░    ░ ░  ░  ░ ░  ░ ░ ░ ░ ▒     ░   ░ ░
-          ░  ░   ░            ░         ░  ░      ░    ░  ░   ░       ░        ░ ░           ░
+          ░  ░   ░            ░         ░  ░      ░    ░  ░   ░       ░        ░ ░           ░ 
                           Network Stress Testing Framework
                 Use with caution and only on authorized networks!
-
+  
   options:
     -h, --help                          show this help message and exit
-
+  
   Supported Features:
     {dhcp,arp,traffic,deauth}
       dhcp                     DHCP exhaustion attack
       arp                      Maintain devices in ARP tables
       traffic                  Capture live packets to a PCAP file
       deauth                   Perform a deauth attack (requires wireless interface in monitor mode)
-
+  
   [WARNING] Use only on networks you own and control!
 ```
-<!-- USAGE:main:end -->
+<!-- USAGE:netarmageddon:end -->
 
 ### Features:
 ### DHCP Exhaustion:
 <!-- USAGE:dhcp:start -->
 ```console
-  Usage: netarmageddon dhcp [-h] -i INTERFACE [-n NUM_DEVICES] [-O REQUEST_OPTIONS] [-s CLIENT_SRC]
-
+  Usage: sudo python -m netarmageddon dhcp [-h] -i INTERFACE [-n NUM_DEVICES] [-O REQUEST_OPTIONS] [-s CLIENT_SRC]
+  
        ██████╗ ██╗  ██╗ ██████╗██████╗
        ██╔══██╗██║  ██║██╔════╝██╔══██╗
        ██║  ██║███████║██║     ██████╔╝
@@ -100,7 +100,7 @@ make
        ██████╔╝██║  ██║╚██████╗██║
        ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝
        Flooding network with malicious DHCP requests
-
+  
   options:
     -h, --help                               show this help message and exit
     -i, --interface INTERFACE                Network interface to use (e.g. eth0)
@@ -113,8 +113,8 @@ make
 ### ARP Keep-Alive:
 <!-- USAGE:arp:start -->
 ```console
-  Usage: netarmageddon arp [-h] -i INTERFACE [-b BASE_IP] [-n NUM_DEVICES] [-m MAC_PREFIX] [-t INTERVAL] [-c CYCLES]
-
+  Usage: sudo python -m netarmageddon arp [-h] -i INTERFACE [-b BASE_IP] [-n NUM_DEVICES] [-m MAC_PREFIX] [-t INTERVAL] [-c CYCLES]
+  
         █████╗ ██████╗ ██████╗
        ██╔══██╗██╔══██╗██╔══██╗
        ███████║██████╔╝██████╔╝
@@ -122,7 +122,7 @@ make
        ██║  ██║██║  ██║██║
        ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝
        Maintaining phantom devices in network tables
-
+  
   options:
     -h, --help                           show this help message and exit
     -i, --interface INTERFACE            Network interface (e.g. eth0)
@@ -137,8 +137,8 @@ make
 ### Traffic Logger:
 <!-- USAGE:traffic:start -->
 ```console
-  Usage: netarmageddon traffic [-h] -i INTERFACE [-f FILTER] -o OUTPUT [-d DURATION] [-c COUNT] [-s SNAPLEN] [-p]
-
+  Usage: sudo python -m netarmageddon traffic [-h] -i INTERFACE [-f FILTER] -o OUTPUT [-d DURATION] [-c COUNT] [-s SNAPLEN] [-p]
+  
      ████████╗██████╗  █████╗ ███████╗███████╗██╗ ██████╗
      ╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██╔════╝██║██╔════╝
         ██║   ██████╔╝███████║█████╗  █████╗  ██║██║
@@ -146,7 +146,7 @@ make
         ██║   ██║  ██║██║  ██║██║     ██║     ██║╚██████╗
         ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝ ╚═════╝
       Capturing all passing network packets
-
+  
   options:
     -h, --help                         show this help message and exit
     -i, --interface INTERFACE          Network interface (e.g. eth0)
@@ -162,8 +162,8 @@ make
 ### Deauthentication Attack:
 <!-- USAGE:deauth:start -->
 ```console
-  Usage: netarmageddon deauth [-h] -i NET_IFACE [-s] [-k] [-S CUSTOM_SSID] [-b CUSTOM_BSSID] [-c CUSTOM_CLIENT_MACS] [-C CUSTOM_CHANNELS [CUSTOM_CHANNELS ...]] [-a] [-D] [-d]
-
+  Usage: sudo python -m netarmageddon deauth [-h] -i NET_IFACE [-s] [-k] [-S CUSTOM_SSID] [-b CUSTOM_BSSID] [-c CUSTOM_CLIENT_MACS] [-C CUSTOM_CHANNELS [CUSTOM_CHANNELS ...]] [-a] [-D] [-d]
+  
        ██████╗ ███████╗ █████╗ ██╗   ██╗████████╗██╗  ██╗
        ██╔══██╗██╔════╝██╔══██╗██║   ██║╚══██╔══╝██║  ██║
        ██║  ██║█████╗  ███████║██║   ██║   ██║   ███████║
@@ -174,7 +174,7 @@ make
        Perform a Wi-Fi deauthentication attack.
        NOTE: you must use this tool on a wireless interface that supports
              monitor mode
-
+  
   options:
     -h, --help                                   show this help message and exit
     -i, --iface NET_IFACE                        Network interface with monitor mode enabled (e.g. wlan0)

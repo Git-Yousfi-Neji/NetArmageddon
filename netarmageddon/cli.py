@@ -106,7 +106,7 @@ def main() -> None:
         description=get_general_banner(),
         epilog=f"{BRIGHT_RED}{BRIGHT_YELLOW}[WARNING] Use only on networks you own and control!{RESET}",
         formatter_class=ColorfulHelpFormatter,
-        prog="netarmageddon",
+        prog="sudo python -m netarmageddon",
     )
 
     subparsers = parser.add_subparsers(dest="command", required=True, title="Supported Features")
