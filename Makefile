@@ -84,7 +84,6 @@ install:
 
 format:
 	@echo "$(BLUE)→ Running formatters…$(RESET)"
-	@pre-commit run isort --files $(shell find . -name '*.py')
 	@pre-commit run black --files $(shell find . -name '*.py')
 	@echo "$(GREEN)🟢 DONE!$(RESET)"
 
