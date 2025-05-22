@@ -26,8 +26,7 @@ class BaseAttack(abc.ABC):
         """Verify network interface exists."""
         if self.interface not in get_if_list():
             raise ValueError(
-                f"Interface '{self.interface}' not found. "
-                f"Available interfaces: {get_if_list()}"
+                f"Interface '{self.interface}' not found. " f"Available interfaces: {get_if_list()}"
             )
 
     def _rate_limit(self, pps: int) -> int:

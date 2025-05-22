@@ -81,7 +81,7 @@ def test_arp_cycles_count_and_exit(monkeypatch: pytest.MonkeyPatch) -> None:
     We patch both sendp and _rate_limit to ensure all sends happen.
     """
     sent = []
-    NUM_DEVICES, CYCLES = 2, 3
+    (NUM_DEVICES, CYCLES) = (2, 3)
 
     # 1) Patch sendp so no real sockets are opened
     monkeypatch.setattr(

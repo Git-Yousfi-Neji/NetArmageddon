@@ -1,5 +1,8 @@
+[tool.black]
 line-length = 100
 target-version = ['py310']
+skip-string-normalization = true
+preview = true
 include = '\.pyi?$'
 exclude = '''
 /(

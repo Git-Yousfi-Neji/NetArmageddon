@@ -8,28 +8,49 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/psf/black
-    rev: 23.12.1
+    rev: 25.1.0
     hooks:
       - id: black
-        args: [--config=config/formatter/.black]
+        args: [
+          --color,
+          --check,
+          --skip-magic-trailing-comma,
+          --config=config/formatter/.black,
+          ]
 
   - repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
+    rev: 6.0.1
     hooks:
       - id: isort
-        args: [--settings-file=config/formatter/.isort.cfg]
+        args: [
+          --check,
+          --settings-path=config/formatter/.isort.cfg
+          ]
 
   - repo: https://github.com/PyCQA/flake8
     rev: 6.1.0
     hooks:
       - id: flake8
-        args: [--config=config/linter/.flake8]
+        args: [
+          --count,
+          --color=always,
+          --config=config/linter/.flake8,
+          --exclude=netarmageddon/utils/banners.py
+        ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.7.1
     hooks:
       - id: mypy
-        args: [--config=config/linter/.mypy.ini]
+        args: [
+          --config=config/linter/.mypy.ini,
+          --warn-unused-ignores,
+          --show-column-numbers,
+          --show-error-code-links,
+          --pretty,
+          --show-absolute-path,
+          --exclude=netarmageddon/utils/banners.py
+          ]
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v14.0.0
@@ -53,4 +74,3 @@ repos:
         ]
         language: system
         files: netarmageddon/core/traffic_c/.*\.(c|h)$
-        working_dir: netarmageddon/core/traffic_c

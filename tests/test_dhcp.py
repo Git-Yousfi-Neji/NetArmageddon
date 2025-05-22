@@ -68,15 +68,11 @@ def test_device_limit_with_two_macs(monkeypatch: pytest.MonkeyPatch) -> None:
     sent_srcs: list[str] = []
 
     # Patch sendp to capture the packet.src instead of actually sending
-    def fake_sendp(
-        pkt: Packet, iface: Optional[str] = None, verbose: bool = False
-    ) -> None:
+    def fake_sendp(pkt: Packet, iface: Optional[str] = None, verbose: bool = False) -> None:
         sent_srcs.append(pkt.src)
 
     # Monkey-patch the sendp function in our module
-    monkeypatch.setattr(
-        "netarmageddon.core.dhcp_exhaustion.sendp", fake_sendp, raising=True
-    )
+    monkeypatch.setattr("netarmageddon.core.dhcp_exhaustion.sendp", fake_sendp, raising=True)
 
     # Provide exactly two MACs but request three devices
     macs = ["00:11:22:33:44:55", "aa:bb:cc:dd:ee:ff"]

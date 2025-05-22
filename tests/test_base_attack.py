@@ -156,9 +156,7 @@ def test_thread_cleanup_on_failure(
     # Force is_alive() True and join() to raise
     with (
         patch.object(mock_attack.thread, "is_alive", return_value=True),
-        patch.object(
-            mock_attack.thread, "join", side_effect=RuntimeError("Thread stuck")
-        ),
+        patch.object(mock_attack.thread, "join", side_effect=RuntimeError("Thread stuck")),
     ):
         mock_attack.stop()
 
@@ -175,16 +173,11 @@ def test_logging_configuration(caplog: pytest.LogCaptureFixture) -> None:
         assert attack.__class__.__name__ in caplog.text
 
 
-def test_stuck_attack_stop(
-    stuck_attack: StuckAttack, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_stuck_attack_stop(stuck_attack: StuckAttack, caplog: pytest.LogCaptureFixture) -> None:
     """Test that StuckAttack._base_stop logs an error if thread won't join."""
     attack = stuck_attack
     attack.start()
     time.sleep(0.1)
     with caplog.at_level(logging.ERROR):
         attack.stop()
-    assert (
-        "Thread join error" in caplog.text
-        or "Failed to stop attack thread" in caplog.text
-    )
+    assert "Thread join error" in caplog.text or "Failed to stop attack thread" in caplog.text
