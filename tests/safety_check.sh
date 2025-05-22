@@ -45,24 +45,26 @@ footer() {
 }
 
 # Test functions
-test_rate_limit() {
-    python -m netarmageddon dhcp -i lo -n 101 2>&1 | \
-    grep -q "exceeds safety limit"
+test_dhcp() {
+    pytest --verbose --color=yes --code-highlight=yes tests/test_dhcp.py
 }
 
-test_invalid_interface() {
-    python -m netarmageddon dhcp -i invalid_interface -n 10 2>&1 | \
-    grep -q "not found"
+test_arp() {
+    pytest --verbose --color=yes --code-highlight=yes tests/test_arp.py
 }
 
-test_invalid_ip_format() {
-    python -m netarmageddon arp -i lo -b 192.168.1 -n 10 2>&1 | \
-    grep -q "Invalid base IP"
+test_traffic() {
+    pytest --verbose --color=yes --code-highlight=yes tests/test_traffic.py
+}
+
+test_deauth() {
+    pytest --verbose --color=yes --code-highlight=yes tests/test_deauth.py
 }
 
 # Main execution
 header
-test_case "DHCP Rate Limiting" test_rate_limit
-test_case "Invalid Interface Handling" test_invalid_interface
-test_case "Invalid IP Format Validation" test_invalid_ip_format
+test_case "DHCP" test_dhcp
+test_case "DHCP" test_arp
+test_case "DHCP" test_traffic
+test_case "DHCP" test_deauth
 footer
