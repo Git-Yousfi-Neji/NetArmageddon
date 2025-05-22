@@ -14,23 +14,23 @@ A network stress testing framework for simulating device connections and evaluat
 ## Features ✨
 
 - [x] **DHCP Exhaustion**: Simulate hundreds of devices connecting via DHCP
-- [x] **ARP Keep- [x]Alive**: Maintain fake devices in router ARP tables
+- [x] **ARP Keep-Alive**: Maintain fake devices in router ARP tables
 - [x] **Safety Controls**: Rate limiting and input validation
 - [x] **Extensible Architecture**: Easy to add new attack modules
-- [x] **CLI Interface**: Simple command- [x]line control
+- [x] **CLI Interface**: Simple command-line control
 - [x] **MAC Address Cycling**: Rotate through custom MAC addresses for each device
 - [x] **DHCP Options Control**: Specify exact DHCP options for detailed simulation
 - [x] **Device Limits**: Configure the maximum number of simulated devices
-- [x] **Thread- [x]Safe Generation**: Safely generate packets across multiple threads
-- [x] **Type- [x]Safe Codebase**: Full mypy type checking coverage
-- [x] **Automated Code Quality**: Pre- [x]commit hooks for formatting/linting
+- [x] **Thread Safe Generation**: Safely generate packets across multiple threads
+- [x] **Type Safe Codebase**: Full mypy type checking coverage
+- [x] **Automated Code Quality**: Pre-commit hooks for formatting/linting
 - [x] **Modern Testing Suite**: 90%+ test coverage with pytest
-- [x] **C- [x]Backend**: High- [x]performance packet capture using libpcap
+- [x] **C-Backend**: High-performance packet capture using libpcap
 - [x] **BPF Filter Support**: Precise traffic selection using Berkeley Packet Filters
 - [x] **Capture Limits**: Configurable duration and packet count thresholds
 - [x] **Promiscuous Mode**: Optional interface promiscuity for full traffic visibility
 - [x] **Deauthentication Attack**: Perform Wi-Fi deauth attacks targeting access points and clients
-- [ ] **Bug fixing**: Working on issue fixing
+- [ ] **Bug fixing**: Actively working on issue fixing
 
 ## Warning ⚠️
 
@@ -46,6 +46,8 @@ Misuse may violate laws and damage network equipment. Use responsibly!
 #### Clone repository
 ```
 git clone https://github.com/Git-Yousfi-Neji/NetArmageddon.git
+```
+```
 cd NetArmageddon
 ```
 
