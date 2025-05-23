@@ -83,8 +83,11 @@ def test_channel_parsing(parser):
     assert args.Channels == ["1", "6", "11"]
 
 
-def test_help_command():
-    cmd = ["python", "-m", "netarmageddon", "deauth", "-i", "dummy_intf"]
+def test_help_command(capsys):
+    # Invoke your CLI
+    import sys
+
+    cmd = [sys.executable, "-m", "netarmageddon", "deauth", "-i", "dummy_intf"]
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     assert "This script requires root privileges" in result.stdout
 

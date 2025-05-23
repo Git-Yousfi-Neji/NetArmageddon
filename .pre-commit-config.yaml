@@ -18,7 +18,7 @@ repos:
       - id: black
         name: black
         always_run: true
-        entry: black --color --verbose --skip-magic-trailing-comma --config=config/formatter/.black .
+        entry: black --color --skip-magic-trailing-comma --config=config/formatter/.black .
         pass_filenames: false
         language: system
         types: [python]
