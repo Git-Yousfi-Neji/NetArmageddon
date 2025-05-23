@@ -64,7 +64,7 @@ test_deauth() {
 # Main execution
 header
 test_case "DHCP" test_dhcp
-test_case "DHCP" test_arp
-test_case "DHCP" test_traffic
-test_case "DHCP" test_deauth
+test_case "ARP" test_arp
+test_case "TRAFFIC" test_traffic
+test_case "DEAUTH" test_deauth
 footer

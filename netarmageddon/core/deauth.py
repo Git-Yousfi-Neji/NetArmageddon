@@ -192,7 +192,7 @@ class Interceptor:
         return ch_list
 
     def _enable_monitor_mode(self):
-        script_path = Path(__file__).parent.parent / "utils" / "toggle_wireless_mode.sh"
+        script_path = Path(__file__).resolve().parents[2] / "scripts" / "toggle_wireless_mode.sh"
 
         if not script_path.exists():
             self.log_debug(f"Script not found: {script_path}")

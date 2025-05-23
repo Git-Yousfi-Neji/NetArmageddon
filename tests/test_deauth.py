@@ -1,5 +1,4 @@
 import subprocess
-import sys
 from argparse import ArgumentParser, Namespace
 
 import pytest
@@ -85,8 +84,13 @@ def test_channel_parsing(parser):
 
 
 def test_help_command():
-    result = subprocess.run(
-        [sys.executable, "-m", "netarmageddon", "deauth", "--help"], capture_output=True, text=True
-    )
+    cmd = ["python", "-m", "netarmageddon", "deauth", "-i", "dummy_intf"]
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     assert result.returncode == 1
     assert "This script requires root privileges" in result.stdout
+
+
+def test_help_without_root_privileges():
+    cmd = ["python", "-m", "netarmageddon", "deauth", "-h"]
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    assert result.returncode == 0
