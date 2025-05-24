@@ -3,13 +3,13 @@ import logging
 import os
 import sys
 import time
+import signal
 from typing import List
 
 from netarmageddon.utils.config_loader import ConfigLoader
 from netarmageddon.core.traffic import TrafficLogger
 
 from .core import ARPKeepAlive, DHCPExhaustion, Interceptor
-from .core.base_attack import BaseAttack
 from .utils.banners import (
     get_arp_banner,
     get_deauth_banner,
@@ -359,7 +359,6 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        attack: BaseAttack
         if args.command == "dhcp":
             attack = DHCPExhaustion(
                 interface=args.interface,
@@ -367,6 +366,8 @@ def main() -> None:
                 request_options=args.request_options,
                 client_src=args.client_src,
             )
+            signal.signal(signal.SIGINT, lambda sig, frame: attack.user_abort())
+            attack.start()
 
         elif args.command == "arp":
             attack = ARPKeepAlive(
@@ -376,6 +377,9 @@ def main() -> None:
                 interval=args.interval,
                 cycles=args.cycles,
             )
+            signal.signal(signal.SIGINT, lambda sig, frame: attack.user_abort())
+            attack.start()
+
         elif args.command == "traffic":
             attack = TrafficLogger(
                 interface=args.interface,
@@ -386,11 +390,11 @@ def main() -> None:
                 snaplen=args.snaplen,
                 promisc=args.promisc,
             )
-        elif args.command == "deauth":
-            import signal
+            signal.signal(signal.SIGINT, lambda sig, frame: attack.user_abort())
+            attack.start()
 
-            signal.signal(signal.SIGINT, Interceptor.user_abort)
-            attacker = Interceptor(
+        elif args.command == "deauth":
+            attack = Interceptor(
                 net_iface=args.net_iface,
                 skip_monitor_mode_setup=args.skip_monitormode,
                 kill_networkmanager=args.kill_networkmanager,
@@ -402,7 +406,9 @@ def main() -> None:
                 autostart=args.autostart,
                 debug_mode=args.debug_mode,
             )
-            attacker.run()
+            # signal.signal(signal.SIGINT, Interceptor.user_abort)
+            signal.signal(signal.SIGINT, lambda sig, frame: attack.user_abort())
+            attack.start()
 
         with attack:
             while attack.running:

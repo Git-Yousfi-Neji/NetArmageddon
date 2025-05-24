@@ -81,7 +81,7 @@ class Interceptor:
 
         if not skip_monitor_mode_setup:
             print_info("Setting up monitor mode...")
-            if not self._enable_monitor_mode():
+            if not self._enable_monitor_mode("monitor"):
                 print_error("Monitor mode was not enabled properly")
                 raise Exception("Unable to turn on monitor mode")
             print_info("Monitor mode was set up successfully")
@@ -99,7 +99,7 @@ class Interceptor:
         self._custom_ssid_name: Union[str, None] = self.parse_custom_ssid_name(ssid_name)
         self.log_debug(f"Selected custom ssid name: {self._custom_ssid_name}")
         self._custom_bssid_addr: Union[str, None] = self.parse_custom_bssid_addr(bssid_addr)
-        self.log_debug(f"Selected custom bssid addr: {self._custom_ssid_name}")
+        self.log_debug(f"Selected custom bssid addr: {self._custom_bssid_addr}")
         self._custom_target_client_mac: Union[List[str], None] = self.parse_custom_client_mac(
             custom_client_macs
         )
@@ -191,14 +191,14 @@ class Interceptor:
                         raise Exception("Unsupported channel")
         return ch_list
 
-    def _enable_monitor_mode(self):
+    def _enable_monitor_mode(self, mode: str):
         script_path = Path(__file__).resolve().parents[2] / "scripts" / "toggle_wireless_mode.sh"
 
         if not script_path.exists():
             self.log_debug(f"Script not found: {script_path}")
             return False
 
-        cmd = ["sudo", "bash", str(script_path), self.interface, "monitor"]
+        cmd = ["sudo", "bash", str(script_path), self.interface, mode]
         print_cmd(f"Running script -> '{' '.join(cmd)}'")
 
         try:
@@ -210,17 +210,17 @@ class Interceptor:
         sleep(2)  # wait for mode to settle
 
         iface_check = subprocess.run(
-            f"iw dev {self.interface} info | grep 'type monitor'",
+            f"iw dev {self.interface} info | grep 'type {mode}'",
             shell=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
 
         if iface_check.returncode != 0:
-            self.log_debug(f"Monitor mode NOT enabled on {self.interface}")
+            self.log_debug(f"{mode} mode NOT enabled on {self.interface}")
             return False
 
-        self.log_debug(f"Monitor mode enabled on {self.interface}")
+        self.log_debug(f"{mode} mode enabled on {self.interface}")
         return True
 
     @staticmethod
@@ -272,7 +272,9 @@ class Interceptor:
                 if self._custom_ssid_name_is_set():
                     self._custom_target_ap_last_ch = self._all_ssids[band_type][ssid].channel
             else:
-                self._clients_sniff_cb(pkt)  # pass forward to find potential clients
+                # only sniff clients after target_ssid has been chosen
+                if self.target_ssid is not None:
+                    self._clients_sniff_cb(pkt)  # pass forward to find potential clients
         except Exception as exc:
             print_error(f"{exc}")
             pass
@@ -475,7 +477,7 @@ class Interceptor:
             iface=self.interface,
         )
 
-    def run(self):
+    def start(self):
         self.target_ssid = self._start_initial_ap_scan()
         ssid_ch = self.target_ssid.channel
         print_info(f"Attacking target {self.target_ssid.name}")
