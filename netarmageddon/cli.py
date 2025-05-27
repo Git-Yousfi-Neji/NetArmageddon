@@ -5,6 +5,7 @@ import sys
 import time
 import signal
 from typing import List
+from distutils.util import strtobool
 
 from netarmageddon.utils.config_loader import ConfigLoader
 from netarmageddon.core.traffic import TrafficLogger
@@ -23,7 +24,7 @@ from .utils.output_manager import (
     BRIGHT_YELLOW,
     GREEN,
     RESET,
-    WARNING,
+    WARN,
     ColorfulHelpFormatter,
 )
 
@@ -248,9 +249,16 @@ def main() -> None:
     traffic_parser.add_argument(
         "-p",
         "--promisc",
-        action="store_true",
+        type=lambda value: (
+            bool(strtobool(value))
+            if value.lower() in {"true", "1", "false", "0"}
+            else (_ for _ in ()).throw(
+                argparse.ArgumentTypeError(f"Invalid boolean value: {value}")
+            )
+        ),
+        metavar='BOOL',
         default=ConfigLoader.get("attacks", "traffic", "default_promisc", default=True),
-        help="Enable promiscuous mode",
+        help='Promiscuous mode (true/false, yes/no, 1/0)',
     )
 
     # DEAUTH subcommand
@@ -274,7 +282,7 @@ def main() -> None:
     deauth_parser.add_argument(
         "-s",
         "--skip-monitormode",
-        help=f"Skip automatic monitor mode setup ({WARNING}use if already configured{RESET})",
+        help=f"Skip automatic monitor mode setup ({WARN}use if already configured{RESET})",
         action="store_true",
         default=ConfigLoader.get("attacks", "deauth", "default_monitormode", default=False),
         dest="skip_monitormode",
@@ -340,7 +348,7 @@ def main() -> None:
     deauth_parser.add_argument(
         "-D",
         "--Debug",
-        help=f"{WARNING}Enable verbose debug output{RESET}",
+        help=f"{WARN}Enable verbose debug output{RESET}",
         action="store_true",
         default=ConfigLoader.get("attacks", "deauth", "default_debug", default=False),
         dest="debug_mode",

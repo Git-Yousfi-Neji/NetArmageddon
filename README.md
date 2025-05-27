@@ -137,7 +137,7 @@ make
 ### Traffic Logger:
 <!-- USAGE:traffic:start -->
 ```console
-  Usage: sudo python -m netarmageddon traffic [-h] -i INTERFACE [-f FILTER] -o OUTPUT [-d DURATION] [-c COUNT] [-s SNAPLEN] [-p]
+  Usage: sudo python -m netarmageddon traffic [-h] -i INTERFACE [-f FILTER] -o OUTPUT [-d DURATION] [-c COUNT] [-s SNAPLEN] [-p BOOL]
   
      ████████╗██████╗  █████╗ ███████╗███████╗██╗ ██████╗
      ╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██╔════╝██║██╔════╝
@@ -148,14 +148,14 @@ make
       Capturing all passing network packets
   
   options:
-    -h, --help                         show this help message and exit
-    -i, --interface INTERFACE          Network interface (e.g. eth0)
-    -f, --filter FILTER                BPF filter (e.g. 'tcp port 80')
-    -o, --output OUTPUT                Output PCAP filename
-    -d, --duration DURATION            Capture duration in seconds (0=unlimited)
-    -c, --count COUNT                  Max packets to capture (0=unlimited)
-    -s, --snaplen SNAPLEN              Snapshot length (bytes)
-    -p, --promisc                      Enable promiscuous mode
+    -h, --help                                                     show this help message and exit
+    -i, --interface INTERFACE                                      Network interface (e.g. eth0)
+    -f, --filter FILTER                                            BPF filter (e.g. 'tcp port 80')
+    -o, --output OUTPUT                                            Output PCAP filename
+    -d, --duration DURATION                                        Capture duration in seconds (0=unlimited)
+    -c, --count COUNT                                              Max packets to capture (0=unlimited)
+    -s, --snaplen SNAPLEN                                          Snapshot length (bytes)
+    -p, --promisc BOOL                                             Promiscuous mode (true/false, yes/no, 1/0)
 ```
 <!-- USAGE:traffic:end -->
 

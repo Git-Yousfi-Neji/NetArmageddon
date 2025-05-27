@@ -11,7 +11,7 @@ DELIM = 80 * "="
 RESET = "\033[0m"
 UNDERLINE = "\033[4m"
 BOLD = "\033[1m"
-WARNING = "\033[93m"
+WARN = "\033[93m"
 HEADER = "\033[95m"
 
 # Standard colors
@@ -46,7 +46,7 @@ class ColorfulHelpFormatter(argparse.RawTextHelpFormatter):
         else:
             parts = []
             for option_string in action.option_strings:
-                parts.append(f"{WARNING}{option_string}{RESET}")
+                parts.append(f"{WARN}{option_string}{RESET}")
                 if action.metavar not in (None, argparse.SUPPRESS):
                     parts.append(f"{BLUE}{action.metavar}{RESET}")
             return ", ".join(parts)
@@ -77,20 +77,38 @@ def clear_line(lines: int = 1) -> None:
 
 
 def print_error(text: str) -> None:
-    printf(f"[{BOLD}{RED}!{RESET}] {text}")
+    printf(f"{BOLD}{RED} [ ✖ ] {text}{RESET}")
 
 
 def print_info(text: str, end: str = "\n") -> None:
-    printf(f"[{BOLD}{BLUE}*{RESET}] {text}", end=end)
+    printf(f"{BOLD}{BRIGHT_YELLOW}[ ~ ]  {text}{RESET}", end=end)
 
 
 def print_input(text: str) -> str:
-    return input(f"[{BOLD}{GREEN}<{RESET}] {text} ")
+    return input(f"{BOLD}{BRIGHT_WHITE}[ < ] {text}{RESET}")
 
 
 def print_cmd(text: str) -> None:
-    printf(f"[{BOLD}{GREEN}>{RESET}] {text}")
+    printf(f"{BOLD}{GREEN} [ ▹ ] {text}{RESET}")
 
 
 def print_debug(text: str) -> None:
-    printf(f"[{BOLD}{YELLOW}~{RESET}] {text}")
+    printf(f"{BOLD}{BRIGHT_CYAN}[ ➤ ] {text}{RESET}")
+
+
+def print_warning(text: str) -> None:
+    printf(f"{BOLD}{YELLOW}[❗] {text}{RESET}")
+
+
+def print_header(text: str) -> None:
+    printf(f"{BOLD}{HEADER}[{text}]{RESET}")
+
+
+CLEAR = clear_line
+CMD = print_cmd
+ERROR = print_error
+DEBUG = print_debug
+WARNING = print_warning
+INFO = print_info
+INPUT = print_input
+HEAD = print_header

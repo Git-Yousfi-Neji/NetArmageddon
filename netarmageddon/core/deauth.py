@@ -21,12 +21,12 @@ from netarmageddon.utils.output_manager import (
     RED,
     RESET,
     YELLOW,
-    clear_line,
-    print_cmd,
-    print_debug,
-    print_error,
-    print_info,
-    print_input,
+    CLEAR,
+    CMD,
+    DEBUG,
+    ERROR,
+    INFO,
+    INPUT,
     printf,
 )
 from scapy.all import RandMAC, sendp, sniff
@@ -80,18 +80,18 @@ class Interceptor:
         self._debug_mode = debug_mode
 
         if not skip_monitor_mode_setup:
-            print_info("Setting up monitor mode...")
+            INFO("Setting up monitor mode...")
             if not self._enable_monitor_mode("monitor"):
-                print_error("Monitor mode was not enabled properly")
+                ERROR("Monitor mode was not enabled properly")
                 raise Exception("Unable to turn on monitor mode")
-            print_info("Monitor mode was set up successfully")
+            INFO("Monitor mode was set up successfully")
         else:
-            print_info("Skipping monitor mode setup...")
+            INFO("Skipping monitor mode setup...")
 
         if kill_networkmanager:
-            print_info("Killing NetworkManager...")
+            INFO("Killing NetworkManager...")
             if not self._kill_networkmanager():
-                print_error("Failed to kill NetworkManager...")
+                ERROR("Failed to kill NetworkManager...")
 
         self._channel_range = {channel: defaultdict(dict) for channel in self._get_channels()}
         self.log_debug(f"Supported channels: {[c for c in self._channel_range.keys()]}")
@@ -116,7 +116,7 @@ class Interceptor:
         self._ch_iterator: Union[Generator[int, None, int], None] = None
         if self._deauth_all_channels:
             self._ch_iterator = self._init_channels_generator()
-        print_info(f"De-auth all channels enabled -> {BOLD}{self._deauth_all_channels}{RESET}")
+        INFO(f"De-auth all channels enabled -> {BOLD}{self._deauth_all_channels}{RESET}")
 
         self._autostart = autostart
 
@@ -125,7 +125,7 @@ class Interceptor:
         if ssid_name is not None:
             ssid_name = str(ssid_name)
             if len(ssid_name) == 0:
-                print_error("Custom SSID name cannot be an empty string")
+                ERROR("Custom SSID name cannot be an empty string")
                 raise Exception("Invalid SSID name")
         return ssid_name
 
@@ -135,15 +135,15 @@ class Interceptor:
             try:
                 bssid_addr = Interceptor.verify_mac_addr(bssid_addr)
             except Exception as exc:
-                print_error(f"Invalid bssid address -> {bssid_addr}")
+                ERROR(f"Invalid bssid address -> {bssid_addr}")
                 raise Exception(f"{exc} Bad custom BSSID mac address")
         return bssid_addr
 
     @staticmethod
     def verify_mac_addr(mac_addr: str) -> str:
-        print_info(f"neji mac is {mac_addr}")
+        INFO(f"neji mac is {mac_addr}")
         RandMAC(mac_addr)
-        print_info(f"neji now mac is {mac_addr}")
+        INFO(f"neji now mac is {mac_addr}")
         return mac_addr
 
     @staticmethod
@@ -155,16 +155,16 @@ class Interceptor:
                     custom_client_mac_list = list()
                     custom_client_mac_list.append(Interceptor.verify_mac_addr(mac))
                 except Exception as exc:
-                    print_error(f"Invalid custom client mac address -> {mac}")
+                    ERROR(f"Invalid custom client mac address -> {mac}")
                     raise Exception(f"{exc} Bad custom client mac address")
 
         if custom_client_mac_list:
-            print_info(
+            INFO(
                 "Disabling broadcast deauth, attacking custom clients instead:"
                 f" {custom_client_mac_list}"
             )
         else:
-            print_info(
+            INFO(
                 "No custom clients selected, enabling broadcast deauth and attacking all connected"
                 " clients"
             )
@@ -177,14 +177,14 @@ class Interceptor:
             try:
                 ch_list = [int(ch) for ch in channel_list.split(",")]
             except Exception as exc:
-                print_error(f"Invalid custom channel input -> {channel_list}")
+                ERROR(f"Invalid custom channel input -> {channel_list}")
                 raise Exception(f"{exc} Bad custom channel input")
 
             if len(ch_list):
                 supported_channels = self._channel_range.keys()
                 for ch in ch_list:
                     if ch not in supported_channels:
-                        print_error(
+                        ERROR(
                             f"Custom channel {ch} is not supported by the network interface"
                             f" {list(supported_channels)}"
                         )
@@ -199,7 +199,7 @@ class Interceptor:
             return False
 
         cmd = ["sudo", "bash", str(script_path), self.interface, mode]
-        print_cmd(f"Running script -> '{' '.join(cmd)}'")
+        CMD(f"Running script -> '{' '.join(cmd)}'")
 
         try:
             subprocess.run(cmd, check=True)
@@ -226,7 +226,7 @@ class Interceptor:
     @staticmethod
     def _kill_networkmanager():
         cmd = "systemctl stop NetworkManager"
-        print_cmd(f"Running command -> '{BOLD}{cmd}{RESET}'")
+        CMD(f"Running command -> '{BOLD}{cmd}{RESET}'")
         return not os.system(cmd)
 
     def _set_channel(self, ch_num):
@@ -276,14 +276,14 @@ class Interceptor:
                 if self.target_ssid is not None:
                     self._clients_sniff_cb(pkt)  # pass forward to find potential clients
         except Exception as exc:
-            print_error(f"{exc}")
+            ERROR(f"{exc}")
             pass
 
     def _scan_channels_for_aps(self):
         channels_to_scan = self._get_channel_range()
-        print_info(f"Starting AP scan, please wait... ({len(channels_to_scan)} channels total)")
+        INFO(f"Starting AP scan, please wait... ({len(channels_to_scan)} channels total)")
         if self._custom_ssid_name_is_set():
-            print_info(f"Scanning for target SSID -> {BOLD}{self._custom_ssid_name}{RESET}")
+            INFO(f"Scanning for target SSID -> {BOLD}{self._custom_ssid_name}{RESET}")
         try:
             for idx, ch_num in enumerate(channels_to_scan):
                 if (
@@ -294,9 +294,8 @@ class Interceptor:
                     # make sure sniffing doesn't stop on an overlapped channel for custom SSIDs
                     return
                 self._set_channel(ch_num)
-                print_info(
-                    f"Scanning channel {BOLD}{self._current_channel_num}{RESET}, remaining -> "
-                    f"{len(channels_to_scan) - (idx + 1)} ",
+                INFO(
+                    f"Scanning channel {BOLD}{self._current_channel_num}, remaining -> {len(channels_to_scan) - (idx + 1)}{RESET}",
                     end="\r",
                 )
                 sniff(
@@ -353,24 +352,24 @@ class Interceptor:
         chosen = -1
         if self._autostart:
             if len(target_map) > 1:
-                print_error("Cannot autostart!")
-                print_error(
+                ERROR("Cannot autostart!")
+                ERROR(
                     "Found more than 1 access points, try better filters "
                     "(i.e 5GHz vs 2.4GHz, BSSID address...)"
                 )
             else:
-                print_info("One target was found, autostart was set to True")
+                INFO("One target was found, autostart was set to True")
                 chosen = 1
 
         # won't enter loop if autostart was set
         while chosen not in target_map.keys():
-            user_input = print_input(
+            user_input = INPUT(
                 f"Choose a target from {min(target_map.keys())} to {max(target_map.keys())}:"
             )
             try:
                 chosen = int(user_input)
             except ValueError:
-                print_error("Wrong input! please enter an integer")
+                ERROR("Wrong input! please enter an integer")
 
         return target_map[chosen]
 
@@ -399,14 +398,14 @@ class Interceptor:
                                 f"{GREEN if add_to_target_list else RED}{add_to_target_list}{RESET}"
                             )
         except Exception as exc:
-            print_error(f"{exc}")
+            ERROR(f"{exc}")
             pass
 
     def _print_midrun_output(self):
         bf_sz = len(self._midrun_output_buffer)
         with self._midrun_output_lck:
             for output in self._midrun_output_buffer:
-                print_cmd(output)
+                CMD(output)
             if bf_sz > 0:
                 printf(DELIM, end="\n")
                 bf_sz += 1
@@ -421,7 +420,7 @@ class Interceptor:
         )
 
     def _listen_for_clients(self):
-        print_info("Setting up a listener for new clients...")
+        INFO("Setting up a listener for new clients...")
         sniff(
             prn=self._clients_sniff_cb,
             iface=self.interface,
@@ -433,7 +432,7 @@ class Interceptor:
 
     def _run_deauther(self):
         try:
-            print_info("Starting de-auth loop...")
+            INFO("Starting de-auth loop...")
 
             failed_attempts_ctr = 0
             ap_mac = self.target_ssid.mac_addr
@@ -480,8 +479,8 @@ class Interceptor:
     def start(self):
         self.target_ssid = self._start_initial_ap_scan()
         ssid_ch = self.target_ssid.channel
-        print_info(f"Attacking target {self.target_ssid.name}")
-        print_info(f"Setting channel -> {ssid_ch}")
+        INFO(f"Attacking target {self.target_ssid.name}")
+        INFO(f"Setting channel -> {ssid_ch}")
         self._set_channel(ssid_ch)
 
         printf(f"{DELIM}\n")
@@ -501,23 +500,23 @@ class Interceptor:
 
         while not Interceptor._ABORT:
             buffer_sz = self._print_midrun_output()
-            print_info(f"Target SSID{self.target_ssid.name.rjust(80 - 15, ' ')}")
-            print_info(f"Channel{str(self._current_channel_num).rjust(80 - 11, ' ')}")
-            print_info(f"MAC addr{self.target_ssid.mac_addr.rjust(80 - 12, ' ')}")
-            print_info(f"Net interface{self.interface.rjust(80 - 17, ' ')}")
-            print_info(
+            INFO(f"Target SSID{self.target_ssid.name.rjust(80 - 15, ' ')}")
+            INFO(f"Channel{str(self._current_channel_num).rjust(80 - 11, ' ')}")
+            INFO(f"MAC addr{self.target_ssid.mac_addr.rjust(80 - 12, ' ')}")
+            INFO(f"Net interface{self.interface.rjust(80 - 17, ' ')}")
+            INFO(
                 "Target"
                 f" clients{BOLD}{str(len(self._get_target_clients())).rjust(80 - 18, ' ')}{RESET}"
             )
-            print_info(f"Elapsed sec {BOLD}{str(get_time() - start).rjust(80 - 16, ' ')}{RESET}")
+            INFO(f"Elapsed sec {BOLD}{str(get_time() - start).rjust(80 - 16, ' ')}{RESET}")
             sleep(Interceptor._PRINT_STATS_INTV)
             if Interceptor._ABORT:  # might change while sleeping
                 break
-            clear_line(7 + buffer_sz)
+            CLEAR(7 + buffer_sz)
 
     def log_debug(self, msg: str):
         if self._debug_mode:
-            print_debug(msg)
+            DEBUG(msg)
 
     @staticmethod
     def user_abort(*_):
@@ -529,7 +528,7 @@ class Interceptor:
             Interceptor._ABORT = True
             sleep(Interceptor._PRINT_STATS_INTV * 1.1)  # let prints finish
             printf(f"{DELIM}")
-            print_error(msg)
+            ERROR(msg)
             exit(0)
 
     def _iter_next_channel(self):
