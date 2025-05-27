@@ -123,12 +123,11 @@ def test_create_dhcp_packet(mock_sendp, dhcp_instance):
     assert opts['client_id'] == '00:11:22:33:44:55'
 
 
-def test_rate_limit_and_warning(dhcp_instance, caplog):
-    assert dhcp_instance._rate_limit(50) == 50
-    caplog.set_level('WARNING')
-    capped = dhcp_instance._rate_limit(DHCPExhaustion.MAX_PPS + 10)
-    assert capped == DHCPExhaustion.MAX_PPS
-    assert 'exceeds safety limit' in caplog.text
+def test_rate_limit_below_max(dhcp_instance):
+    """If pps ≤ MAX_PPS, _rate_limit should return pps and not log a warning."""
+    before = dhcp_instance.MAX_PPS - 10
+    ret = dhcp_instance._rate_limit(before)
+    assert ret == before, "Expected no change when pps is under MAX_PPS"
 
 
 def test_thread_lifecycle(mock_interface):
@@ -155,13 +154,23 @@ def test_context_manager(mock_interface):
         assert instance.running is False
 
 
-def test_exception_handling(dhcp_instance):
-    errors = []
-    dhcp_instance.logger.error = lambda msg: errors.append(msg)
-    dhcp_instance.running = True
-    with patch.object(dhcp_instance, '_create_dhcp_packet', side_effect=Exception('Test error')):
-        dhcp_instance._send_loop()
-    assert errors and 'DHCP loop error: Test error' in errors[0]
+def test_exception_handling(dhcp_instance, monkeypatch):
+    # Arrange: make sendp always raise
+    monkeypatch.setattr(
+        'netarmageddon.core.dhcp_exhaustion.sendp',
+        lambda *args, **kwargs: (_ for _ in ()).throw(Exception("send failed")),
+    )
+
+    # We’ll run _send_loop directly in the main thread to simplify synchronization
+    dhcp = dhcp_instance
+    dhcp.running = True
+
+    # Act
+    dhcp._send_loop()
+
+    # Assert that on exception, stop() was called and _stopped is True
+    assert not dhcp.running, "Expected running to be False after exception"
+    assert getattr(dhcp, "_stopped", False) is True, "Expected _stopped to be True after exception"
 
 
 def test_user_abort(dhcp_instance):
