@@ -92,7 +92,7 @@ class DHCPExhaustion:
             DEBUG(f"Using pooled MAC: {mac}")
             return mac
 
-        while True:
+        for _ in range(1000):  # Safety break
             mac = "de:ad:%02x:%02x:%02x:%02x" % (
                 random.randint(0, 0xFF),
                 random.randint(0, 0x7F),
@@ -103,6 +103,7 @@ class DHCPExhaustion:
                 self.sent_macs.add(mac)
                 DEBUG(f"Generated new MAC: {mac}")
                 return mac
+        raise ValueError("MAC pool exhausted")
 
     def _create_dhcp_packet(self) -> Packet:
         """Build DHCP discovery packet"""

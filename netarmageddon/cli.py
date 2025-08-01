@@ -4,8 +4,8 @@ import os
 import sys
 import time
 import signal
+import sys
 from typing import List
-from distutils.util import strtobool
 
 from netarmageddon.utils.config_loader import ConfigLoader
 from netarmageddon.core.traffic import TrafficLogger
@@ -96,6 +96,16 @@ def parse_option_range(option_str: str) -> List[int]:
             options.append(n)
 
     return options
+
+
+def str_to_bool(value: str) -> bool:
+    """Convert string to boolean"""
+    if value.lower() in ("yes", "true", "t", "y", "1"):
+        return True
+    elif value.lower() in ("no", "false", "f", "n", "0"):
+        return False
+    else:
+        raise argparse.ArgumentTypeError("Boolean value expected.")
 
 
 def main() -> None:
@@ -249,13 +259,7 @@ def main() -> None:
     traffic_parser.add_argument(
         "-p",
         "--promisc",
-        type=lambda value: (
-            bool(strtobool(value))
-            if value.lower() in {"true", "1", "false", "0"}
-            else (_ for _ in ()).throw(
-                argparse.ArgumentTypeError(f"Invalid boolean value: {value}")
-            )
-        ),
+        type=str_to_bool,
         metavar='BOOL',
         default=ConfigLoader.get("attacks", "traffic", "default_promisc", default=True),
         help='Promiscuous mode (true/false, yes/no, 1/0)',
