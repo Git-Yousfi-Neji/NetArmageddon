@@ -4,7 +4,6 @@ import os
 import sys
 import time
 import signal
-import sys
 from typing import List
 
 from netarmageddon.utils.config_loader import ConfigLoader
