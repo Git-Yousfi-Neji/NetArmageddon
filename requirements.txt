@@ -1,21 +1,6 @@
-# Network/Protocol
+# ── Core protocol & packet crafting ─────────────────────────────────────────
 scapy==2.6.1
 pyyaml==6.0.2
-argparse==1.4.0  # Only needed for Python <3.2
 
-# Security
-cryptography==3.4.8
-bcrypt==3.2.0
-
-# System Integration
+# ── System integration ───────────────────────────────────────────────────────
 psutil==6.1.1
-netifaces==0.11.0
-
-# CLI
-rich==14.0.0
-rich-argparse==1.7.0
-click==8.1.7
-
-# Data Handling
-python-dateutil==2.8.2
-pytz==2022.1

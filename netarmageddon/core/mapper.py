@@ -1,7 +1,9 @@
 import argparse
 import ctypes
+import logging
 import os
-from venv import logger
+
+logger = logging.getLogger(__name__)
 
 _lib = ctypes.CDLL(os.path.join(os.path.dirname(__file__), "traffic_c", "libtraffic.so"))
 

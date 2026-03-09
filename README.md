@@ -61,6 +61,7 @@ make
 ```console
   Usage: sudo python -m netarmageddon [-h] {dhcp,arp,traffic,deauth} ...
   
+  ════════════════════════════════════════════════════════════════════════════════
       ▄▄▄       ██▀███   ███▄ ▄███▓ ▄▄▄        ▄████ ▓█████ ▓█████▄ ▓█████▄  ▒█████   ███▄    █
       ▒████▄    ▓██ ▒ ██▒▓██▒▀█▀ ██▒▒████▄     ██▒ ▀█▒▓█   ▀ ▒██▀ ██▌▒██▀ ██▌▒██▒  ██▒ ██ ▀█   █
       ▒██  ▀█▄  ▓██ ░▄█ ▒▓██    ▓██░▒██  ▀█▄  ▒██░▄▄▄░▒███   ░██   █▌░██   █▌▒██░  ██▒▓██  ▀█ ██▒
@@ -69,21 +70,24 @@ make
       ▒▒   ▓▒█░░ ▒▓ ░▒▓░░ ▒░   ░  ░ ▒▒   ▓▒█░ ░▒   ▒ ░░ ▒░ ░ ▒▒▓  ▒  ▒▒▓  ▒ ░ ▒░▒░▒░ ░ ▒░   ▒ ▒
       ▒   ▒▒ ░  ░▒ ░ ▒░░  ░      ░  ▒   ▒▒ ░  ░   ░  ░ ░  ░ ░ ▒  ▒  ░ ▒  ▒   ░ ▒ ▒░ ░ ░░   ░ ▒░
       ░   ▒     ░░   ░ ░      ░     ░   ▒   ░ ░   ░    ░    ░ ░  ░  ░ ░  ░ ░ ░ ░ ▒     ░   ░ ░
-          ░  ░   ░            ░         ░  ░      ░    ░  ░   ░       ░        ░ ░           ░ 
-                          Network Stress Testing Framework
-                Use with caution and only on authorized networks!
+          ░  ░   ░            ░         ░  ░      ░    ░  ░   ░       ░        ░ ░           ░
+  
+           Network Stress Testing Framework  — for networks you own
+           ⚠  Use only on authorised networks. Misuse is illegal.
+  ════════════════════════════════════════════════════════════════════════════════
   
   options:
     -h, --help                          show this help message and exit
   
   Supported Features:
     {dhcp,arp,traffic,deauth}
-      dhcp                     DHCP exhaustion attack
-      arp                      Maintain devices in ARP tables
-      traffic                  Capture live packets to a PCAP file
-      deauth                   Perform a deauth attack (requires wireless interface in monitor mode)
+      dhcp                     ⚡ DHCP exhaustion attack
+      arp                      ⬡ Maintain devices in ARP tables
+      traffic                  ◈ Capture live packets to a PCAP file
+      deauth                   ◆ Perform a deauth attack (requires wireless interface in monitor mode)
   
-  [WARNING] Use only on networks you own and control!
+  ────────────────────────────────────────────────────────────────────────────────
+    ⚠  WARNING: Use only on networks you own and control!
 ```
 <!-- USAGE:netarmageddon:end -->
 
@@ -93,13 +97,15 @@ make
 ```console
   Usage: sudo python -m netarmageddon dhcp [-h] -i INTERFACE [-n NUM_DEVICES] [-O REQUEST_OPTIONS] [-s CLIENT_SRC]
   
+  ════════════════════════════════════════════════════════════════════════════════
        ██████╗ ██╗  ██╗ ██████╗██████╗
        ██╔══██╗██║  ██║██╔════╝██╔══██╗
        ██║  ██║███████║██║     ██████╔╝
        ██║  ██║██╔══██║██║     ██╔═══╝
        ██████╔╝██║  ██║╚██████╗██║
-       ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝
-       Flooding network with malicious DHCP requests
+       ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝     
+       ⚡ Exhausting the IP pool — one DISCOVER at a time
+  ════════════════════════════════════════════════════════════════════════════════
   
   options:
     -h, --help                               show this help message and exit
@@ -115,13 +121,15 @@ make
 ```console
   Usage: sudo python -m netarmageddon arp [-h] -i INTERFACE [-b BASE_IP] [-n NUM_DEVICES] [-m MAC_PREFIX] [-t INTERVAL] [-c CYCLES]
   
+  ════════════════════════════════════════════════════════════════════════════════
         █████╗ ██████╗ ██████╗
        ██╔══██╗██╔══██╗██╔══██╗
        ███████║██████╔╝██████╔╝
        ██╔══██║██╔══██╗██╔═══╝
        ██║  ██║██║  ██║██║
-       ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝
-       Maintaining phantom devices in network tables
+       ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     
+       ⬡ Haunting the ARP table with phantom devices
+  ════════════════════════════════════════════════════════════════════════════════
   
   options:
     -h, --help                           show this help message and exit
@@ -139,13 +147,15 @@ make
 ```console
   Usage: sudo python -m netarmageddon traffic [-h] -i INTERFACE [-f FILTER] -o OUTPUT [-d DURATION] [-c COUNT] [-s SNAPLEN] [-p BOOL]
   
+  ════════════════════════════════════════════════════════════════════════════════
      ████████╗██████╗  █████╗ ███████╗███████╗██╗ ██████╗
      ╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██╔════╝██║██╔════╝
         ██║   ██████╔╝███████║█████╗  █████╗  ██║██║
         ██║   ██╔══██╗██╔══██║██╔══╝  ██╔══╝  ██║██║
         ██║   ██║  ██║██║  ██║██║     ██║     ██║╚██████╗
-        ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝ ╚═════╝
-      Capturing all passing network packets
+        ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝ ╚═════╝ 
+       ◈ Silently recording every packet that dares pass by
+  ════════════════════════════════════════════════════════════════════════════════
   
   options:
     -h, --help                                                     show this help message and exit
@@ -164,16 +174,16 @@ make
 ```console
   Usage: sudo python -m netarmageddon deauth [-h] -i NET_IFACE [-s] [-k] [-S CUSTOM_SSID] [-b CUSTOM_BSSID] [-c CUSTOM_CLIENT_MACS] [-C CUSTOM_CHANNELS [CUSTOM_CHANNELS ...]] [-a] [-D] [-d]
   
+  ════════════════════════════════════════════════════════════════════════════════
        ██████╗ ███████╗ █████╗ ██╗   ██╗████████╗██╗  ██╗
        ██╔══██╗██╔════╝██╔══██╗██║   ██║╚══██╔══╝██║  ██║
        ██║  ██║█████╗  ███████║██║   ██║   ██║   ███████║
        ██║  ██║██╔══╝  ██╔══██║██║   ██║   ██║   ██╔══██║
        ██████╔╝███████╗██║  ██║╚██████╔╝   ██║   ██║  ██║
        ╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝
-       Disrupting wireless client connections
-       Perform a Wi-Fi deauthentication attack.
-       NOTE: you must use this tool on a wireless interface that supports
-             monitor mode
+       ◆ Severing wireless connections, one frame at a time
+       ⚠  Requires a wireless interface in monitor mode
+  ════════════════════════════════════════════════════════════════════════════════
   
   options:
     -h, --help                                   show this help message and exit

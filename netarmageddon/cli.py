@@ -5,7 +5,6 @@ import sys
 import time
 import signal
 from typing import List
-from distutils.util import strtobool
 
 from netarmageddon.utils.config_loader import ConfigLoader
 from netarmageddon.core.traffic import TrafficLogger
@@ -20,52 +19,67 @@ from .utils.banners import (
 )
 from .utils.output_manager import (
     BLUE,
+    BOLD,
     BRIGHT_RED,
     BRIGHT_YELLOW,
     GREEN,
     RESET,
     WARN,
     ColorfulHelpFormatter,
+    ERROR,
+    WARNING,
+    THIN_DELIM,
 )
+
+# ── Silence scapy noise globally ──────────────────────────────────────────────
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
+logging.getLogger("scapy.loading").setLevel(logging.ERROR)
+logging.getLogger("scapy.arch.ifaces").setLevel(logging.ERROR)
 
 # Allow help without root privileges
 if any(arg in sys.argv for arg in ("-h", "--help")):
     os.environ["ALLOW_HELP_WITHOUT_ROOT"] = "1"
 
 
+def _strtobool(value: str) -> bool:
+    """stdlib distutils.strtobool replacement (distutils removed in Python 3.12)."""
+    if value.lower() in {"true", "1", "yes", "on"}:
+        return True
+    if value.lower() in {"false", "0", "no", "off"}:
+        return False
+    raise argparse.ArgumentTypeError(f"Invalid boolean value: {value!r}")
+
+
 def check_root_privileges() -> None:
     if not os.getenv("ALLOW_HELP_WITHOUT_ROOT") and os.geteuid() != 0:
-        print(f"{BRIGHT_RED}This script requires root privileges!{RESET}")
+        ERROR("This script requires root privileges!")
         sys.exit(1)
 
 
 def configure_logging() -> None:
-    """Set up logging configuration"""
+    """Set up logging configuration."""
     logging.basicConfig(
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.WARNING
     )
 
 
 def validate_mac(mac: str) -> str:
-    """Validate MAC address format"""
+    """Validate MAC address format."""
     mac = mac.strip().lower()
     if len(mac) != 17:
         raise argparse.ArgumentTypeError(f"{BRIGHT_RED}Invalid MAC length{RESET}")
-
     parts = mac.split(":")
     if len(parts) != 6:
         raise argparse.ArgumentTypeError(f"{BRIGHT_RED}Invalid MAC format{RESET}")
-
     if not all(len(p) == 2 and p.isalnum() for p in parts):
         raise argparse.ArgumentTypeError(f"{BRIGHT_RED}Invalid MAC characters{RESET}")
-
     return mac
 
 
 def parse_option_range(option_str: str) -> List[int]:
     """
-    Convert '1,3-5,7' -> [1,3,4,5,7];
-    raises ValueError on malformed or descending ranges.
+    Convert '1,3-5,7' -> [1,3,4,5,7].
+    Raises ValueError on malformed or descending ranges.
     """
     if not option_str:
         raise ValueError("Option string is empty")
@@ -74,7 +88,6 @@ def parse_option_range(option_str: str) -> List[int]:
     for part in option_str.split(","):
         if not part:
             raise ValueError(f"Empty segment in option string: '{option_str}'")
-
         if "-" in part:
             bounds = part.split("-", 1)
             if len(bounds) != 2 or not bounds[0] or not bounds[1]:
@@ -99,23 +112,27 @@ def parse_option_range(option_str: str) -> List[int]:
 
 
 def main() -> None:
-    """Command-line interface entry point"""
+    """Command-line interface entry point."""
     check_root_privileges()
     configure_logging()
 
     parser = argparse.ArgumentParser(
         description=get_general_banner(),
-        epilog=f"{BRIGHT_RED}{BRIGHT_YELLOW}[WARNING] Use only on networks you own and control!{RESET}",
+        epilog=(
+            f"{THIN_DELIM}\n"
+            f"  {BOLD}{BRIGHT_RED}⚠  WARNING:{RESET} {BRIGHT_YELLOW}"
+            f"Use only on networks you own and control!{RESET}"
+        ),
         formatter_class=ColorfulHelpFormatter,
         prog="sudo python -m netarmageddon",
     )
 
     subparsers = parser.add_subparsers(dest="command", required=True, title="Supported Features")
 
-    # DHCP attack subcommand
+    # ── DHCP subcommand ───────────────────────────────────────────────────────
     dhcp_parser = subparsers.add_parser(
         "dhcp",
-        help=f"{GREEN}DHCP exhaustion attack{RESET}",
+        help=f"{GREEN}⚡ DHCP exhaustion attack{RESET}",
         description=get_dhcp_banner(),
         formatter_class=ColorfulHelpFormatter,
     )
@@ -148,10 +165,10 @@ def main() -> None:
         help=f"Comma-separated list of {BLUE}MAC addresses{RESET} to cycle through",
     )
 
-    # ARP attack subcommand
+    # ── ARP subcommand ────────────────────────────────────────────────────────
     arp_parser = subparsers.add_parser(
         "arp",
-        help=f"{GREEN}Maintain devices in ARP tables{RESET}",
+        help=f"{GREEN}⬡ Maintain devices in ARP tables{RESET}",
         description=get_arp_banner(),
         formatter_class=ColorfulHelpFormatter,
     )
@@ -196,10 +213,10 @@ def main() -> None:
         help="Number of announcement cycles",
     )
 
-    # Traffic-logger subcommand
+    # ── Traffic subcommand ────────────────────────────────────────────────────
     traffic_parser = subparsers.add_parser(
         "traffic",
-        help=f"{GREEN}Capture live packets to a PCAP file{RESET}",
+        help=f"{GREEN}◈ Capture live packets to a PCAP file{RESET}",
         description=get_traffic_banner(),
         formatter_class=ColorfulHelpFormatter,
     )
@@ -249,26 +266,22 @@ def main() -> None:
     traffic_parser.add_argument(
         "-p",
         "--promisc",
-        type=lambda value: (
-            bool(strtobool(value))
-            if value.lower() in {"true", "1", "false", "0"}
-            else (_ for _ in ()).throw(
-                argparse.ArgumentTypeError(f"Invalid boolean value: {value}")
-            )
-        ),
-        metavar='BOOL',
+        type=lambda value: _strtobool(value),
+        metavar="BOOL",
         default=ConfigLoader.get("attacks", "traffic", "default_promisc", default=True),
-        help='Promiscuous mode (true/false, yes/no, 1/0)',
+        help="Promiscuous mode (true/false, yes/no, 1/0)",
     )
 
-    # DEAUTH subcommand
+    # ── Deauth subcommand ─────────────────────────────────────────────────────
     deauth_parser = subparsers.add_parser(
         "deauth",
-        help=f"{GREEN}Perform a deauth attack (requires wireless interface in monitor mode){RESET}",
+        help=(
+            f"{GREEN}◆ Perform a deauth attack "
+            f"(requires wireless interface in monitor mode){RESET}"
+        ),
         formatter_class=ColorfulHelpFormatter,
         description=get_deauth_banner(),
     )
-
     deauth_parser.add_argument(
         "-i",
         "--iface",
@@ -278,7 +291,6 @@ def main() -> None:
         dest="net_iface",
         required=True,
     )
-
     deauth_parser.add_argument(
         "-s",
         "--skip-monitormode",
@@ -288,7 +300,6 @@ def main() -> None:
         dest="skip_monitormode",
         required=False,
     )
-
     deauth_parser.add_argument(
         "-k",
         "--kill",
@@ -319,7 +330,10 @@ def main() -> None:
     deauth_parser.add_argument(
         "-c",
         "--clients",
-        help=f"Target client MAC addresses\n{BLUE}Example: 00:1A:2B:3C:4D:5E,00:1a:2b:3c:4d:5f{RESET}",
+        help=(
+            f"Target client MAC addresses\n"
+            f"{BLUE}Example: 00:1A:2B:3C:4D:5E,00:1a:2b:3c:4d:5f{RESET}"
+        ),
         action="store",
         default=ConfigLoader.get("attacks", "deauth", "default_clients", default=None),
         type=lambda x: [validate_mac(m) for m in x.split(",")],
@@ -376,6 +390,8 @@ def main() -> None:
             )
             signal.signal(signal.SIGINT, lambda sig, frame: attack.user_abort())
             attack.start()
+            while attack.running:
+                time.sleep(0.5)
 
         elif args.command == "arp":
             attack = ARPKeepAlive(
@@ -387,6 +403,8 @@ def main() -> None:
             )
             signal.signal(signal.SIGINT, lambda sig, frame: attack.user_abort())
             attack.start()
+            while attack.running:
+                time.sleep(0.5)
 
         elif args.command == "traffic":
             attack = TrafficLogger(
@@ -400,6 +418,8 @@ def main() -> None:
             )
             signal.signal(signal.SIGINT, lambda sig, frame: attack.user_abort())
             attack.start()
+            while attack.running:
+                time.sleep(0.5)
 
         elif args.command == "deauth":
             attack = Interceptor(
@@ -414,19 +434,13 @@ def main() -> None:
                 autostart=args.autostart,
                 debug_mode=args.debug_mode,
             )
-            # signal.signal(signal.SIGINT, Interceptor.user_abort)
             signal.signal(signal.SIGINT, lambda sig, frame: attack.user_abort())
-            attack.start()
-
-        with attack:
-            while attack.running:
-                time.sleep(1)
+            attack.start()  # blocking — joins its own threads internally
 
     except KeyboardInterrupt:
-        attack.stop()
-        logging.info("\nAttack stopped by user")
+        WARNING("Attack interrupted by user")
     except Exception as e:
-        logging.error(f"Critical error: {str(e)}")
+        ERROR(f"Critical error: {str(e)}")
         exit(1)
 
 
