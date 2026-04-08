@@ -2,30 +2,32 @@ import random
 import re
 import threading
 import time
-from typing import Optional
+from typing import List, Optional
 
 from scapy.all import sendp
+from scapy.arch import get_if_list
 from scapy.layers.l2 import ARP, Ether
 from scapy.packet import Packet
-from scapy.arch import get_if_list
 
 from netarmageddon.utils.output_manager import (
-    HEAD,
-    INFO,
-    DEBUG,
-    WARNING,
-    ERROR,
-    CMD,
-    CLEAR,
-    SUCCESS,
     BOLD,
-    RESET,
     BRIGHT_CYAN,
     BRIGHT_WHITE,
     BRIGHT_YELLOW,
+    CLEAR,
+    CMD,
+    DEBUG,
+    ERROR,
+    HEAD,
+    INFO,
+    RESET,
+    SUCCESS,
     THIN_DELIM,
+    WARNING,
     make_progress_bar,
 )
+
+_MAC_RE = re.compile(r"^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
 
 
 class ARPKeepAlive:
@@ -41,10 +43,10 @@ class ARPKeepAlive:
         mac_prefix: str = "de:ad:00",
         interval: float = 5.0,
         cycles: int = 1,
+        target_macs: Optional[List[str]] = None,
     ) -> None:
         self.interface = interface
         self.base_ip = base_ip
-        self.num_devices = num_devices
         self.mac_prefix = mac_prefix
         self.interval = interval
         self.cycles = cycles
@@ -53,18 +55,45 @@ class ARPKeepAlive:
         self._stopped = False
         self.start_time = time.time()
 
+        # When target_macs is provided, they define both the MACs and the
+        # device count; num_devices is ignored in that case.
+        self.target_macs: Optional[List[str]] = None
+        if target_macs is not None:
+            self._validate_target_macs(target_macs)
+            self.target_macs = [m.lower().strip() for m in target_macs]
+            self.num_devices = len(self.target_macs)
+        else:
+            self.num_devices = num_devices
+
         self._validate_interface()
         self._validate_ip()
-        self._validate_mac_prefix()
+        if not self.target_macs:
+            self._validate_mac_prefix()
 
         HEAD("⬡  ARP Keep-Alive — Configuration")
         CMD(f"  {'Interface':<20} {BRIGHT_CYAN}{interface}{RESET}")
-        CMD(f"  {'Base IP':<20} {BRIGHT_CYAN}{base_ip}<1..{num_devices}>{RESET}")
-        CMD(f"  {'Devices':<20} {BRIGHT_CYAN}{num_devices}{RESET}")
-        CMD(f"  {'MAC Prefix':<20} {BRIGHT_CYAN}{mac_prefix}:xx:xx:xx{RESET}")
+        CMD(f"  {'Base IP':<20} {BRIGHT_CYAN}{base_ip}<1..{self.num_devices}>{RESET}")
+        CMD(f"  {'Devices':<20} {BRIGHT_CYAN}{self.num_devices}{RESET}")
+        if self.target_macs:
+            CMD(f"  {'Target MACs':<20} {BRIGHT_CYAN}" f"{', '.join(self.target_macs)}{RESET}")
+        else:
+            CMD(f"  {'MAC Prefix':<20} {BRIGHT_CYAN}{mac_prefix}:xx:xx:xx{RESET}")
         CMD(f"  {'Interval':<20} {BRIGHT_CYAN}{interval}s between cycles{RESET}")
         CMD(f"  {'Cycles':<20} {BRIGHT_CYAN}{cycles}{RESET}")
         CMD(THIN_DELIM)
+
+    def _validate_target_macs(self, macs: List[str]) -> None:
+        DEBUG(f"Validating {len(macs)} target MAC(s)")
+        if not macs:
+            ERROR("target_macs list must not be empty")
+            raise ValueError("target_macs list must not be empty")
+        for mac in macs:
+            if not _MAC_RE.match(mac.strip()):
+                ERROR(f"Invalid target MAC address: {mac}")
+                raise ValueError(
+                    f"Invalid MAC address '{mac}'. " "Use format like '00:11:22:33:44:55'"
+                )
+        INFO(f"All {len(macs)} target MAC address(es) validated")
 
     def _validate_interface(self) -> None:
         DEBUG(f"Validating interface: {self.interface}")
@@ -95,11 +124,15 @@ class ARPKeepAlive:
         return pps
 
     def _generate_mac(self, ip_suffix: int) -> str:
-        """Generate a MAC address for this device instance.
+        """Return MAC address for this device slot.
 
-        The prefix is deterministic (from mac_prefix + ip_suffix); the trailing
-        two octets are randomised per call to avoid collisions.
+        When *target_macs* is set the MAC at index ``ip_suffix - 1`` is
+        returned verbatim (no randomness — these are the MACs we want to
+        keep alive).  Otherwise a pseudo-random MAC is built from
+        *mac_prefix* + ip_suffix + two random octets, exactly as before.
         """
+        if self.target_macs is not None:
+            return self.target_macs[ip_suffix - 1]
         mac = (
             f"{self.mac_prefix}:"
             f"{ip_suffix:02x}:"

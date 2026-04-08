@@ -119,7 +119,7 @@ make
 ### ARP Keep-Alive:
 <!-- USAGE:arp:start -->
 ```console
-  Usage: sudo python -m netarmageddon arp [-h] -i INTERFACE [-b BASE_IP] [-n NUM_DEVICES] [-m MAC_PREFIX] [-t INTERVAL] [-c CYCLES]
+  Usage: sudo python -m netarmageddon arp [-h] -i INTERFACE [-b BASE_IP] [-n NUM_DEVICES] [-m MAC_PREFIX] [-t INTERVAL] [-c CYCLES] [-M MAC[,MAC...]]
   
   ════════════════════════════════════════════════════════════════════════════════
         █████╗ ██████╗ ██████╗
@@ -132,13 +132,14 @@ make
   ════════════════════════════════════════════════════════════════════════════════
   
   options:
-    -h, --help                           show this help message and exit
-    -i, --interface INTERFACE            Network interface (e.g. eth0)
-    -b, --base-ip BASE_IP                Base IP address (e.g. 192.168.1.)
-    -n, --num-devices NUM_DEVICES        Number of devices to maintain
-    -m, --mac-prefix MAC_PREFIX          MAC address prefix (default: de:ad:00)
-    -t, --interval INTERVAL              Seconds between ARP bursts
-    -c, --cycles CYCLES                  Number of announcement cycles
+    -h, --help                                                                         show this help message and exit
+    -i, --interface INTERFACE                                                          Network interface (e.g. eth0)
+    -b, --base-ip BASE_IP                                                              Base IP address (e.g. 192.168.1.)
+    -n, --num-devices NUM_DEVICES                                                      Number of devices to maintain
+    -m, --mac-prefix MAC_PREFIX                                                        MAC address prefix (default: de:ad:00)
+    -t, --interval INTERVAL                                                            Seconds between ARP bursts
+    -c, --cycles CYCLES                                                                Number of announcement cycles
+    -M, --target-macs MAC[,MAC...]                                                     Comma-separated list of specific MAC addresses to keep alive (e.g. de:ad:be:ef:00:01,de:ad:be:ef:00:02). When set, --num-devices is ignored.
 ```
 <!-- USAGE:arp:end -->
 

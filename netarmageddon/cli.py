@@ -1,13 +1,13 @@
 import argparse
 import logging
 import os
+import signal
 import sys
 import time
-import signal
 from typing import List
 
-from netarmageddon.utils.config_loader import ConfigLoader
 from netarmageddon.core.traffic import TrafficLogger
+from netarmageddon.utils.config_loader import ConfigLoader
 
 from .core import ARPKeepAlive, DHCPExhaustion, Interceptor
 from .utils.banners import (
@@ -22,13 +22,13 @@ from .utils.output_manager import (
     BOLD,
     BRIGHT_RED,
     BRIGHT_YELLOW,
+    ERROR,
     GREEN,
     RESET,
-    WARN,
-    ColorfulHelpFormatter,
-    ERROR,
-    WARNING,
     THIN_DELIM,
+    WARN,
+    WARNING,
+    ColorfulHelpFormatter,
 )
 
 # ── Silence scapy noise globally ──────────────────────────────────────────────
@@ -92,7 +92,7 @@ def parse_option_range(option_str: str) -> List[int]:
             bounds = part.split("-", 1)
             if len(bounds) != 2 or not bounds[0] or not bounds[1]:
                 raise ValueError(f"Malformed range: '{part}'")
-            (start_str, end_str) = bounds
+            start_str, end_str = bounds
             try:
                 start = int(start_str)
                 end = int(end_str)
@@ -211,6 +211,19 @@ def main() -> None:
         type=int,
         default=ConfigLoader.get("attacks", "arp", "default_cycles", default=1),
         help="Number of announcement cycles",
+    )
+    arp_parser.add_argument(
+        "-M",
+        "--target-macs",
+        type=lambda x: [validate_mac(m) for m in x.split(",")],
+        default=ConfigLoader.get("attacks", "arp", "default_target_macs", default=None),
+        dest="target_macs",
+        metavar="MAC[,MAC...]",
+        help=(
+            f"Comma-separated list of specific MAC addresses to keep alive "
+            f"({BLUE}e.g. de:ad:be:ef:00:01,de:ad:be:ef:00:02{RESET}). "
+            f"When set, --num-devices is ignored."
+        ),
     )
 
     # ── Traffic subcommand ────────────────────────────────────────────────────
@@ -398,8 +411,10 @@ def main() -> None:
                 interface=args.interface,
                 base_ip=args.base_ip,
                 num_devices=args.num_devices,
+                mac_prefix=args.mac_prefix,
                 interval=args.interval,
                 cycles=args.cycles,
+                target_macs=args.target_macs,
             )
             signal.signal(signal.SIGINT, lambda sig, frame: attack.user_abort())
             attack.start()
